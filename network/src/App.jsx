@@ -1,13 +1,30 @@
-import React from 'react'
+import { BrowserRouter,Routes,Route } from "react-router-dom";
+import Home from "./pages/Home";  
+import About from "./pages/About";
+import SignUp from "./pages/SignUp";
+import SignIn from "./pages/SignIn";
+import Profile from "./pages/Profile";
+import Header from "./components/Header";
 
 
 function App() {
   
 
   return (
-    <>
-      <div>hello</div>
-    </>
+   
+      <BrowserRouter>
+      <Header/>
+        <Routes>
+          <Route path="/" element={<div>Home</div>} />
+          <Route path="/About" element={<div>About</div>} />
+          <Route path="/profile" element={<div>Profile</div>} />
+          <Route path="/signup" element={<div>SignUp</div>} />
+          <Route path="/signin" element={<div>SignIn</div>} />
+          <Route path="*" element={<div>404 Not Found</div>} />
+
+        </Routes>
+      </BrowserRouter>
+    
   )
 }
 
