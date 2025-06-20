@@ -2,6 +2,7 @@
 import express from 'express';
 import mongoose from 'mongoose';
 import dotenv from 'dotenv';
+import userRoutes from './routes/user.routes.js';
 
 dotenv.config(); 
 
@@ -14,3 +15,5 @@ mongoose.connect(process.env.MONGO_URI)
 app.listen(3000, () => {
   console.log('API server is running on http://localhost:3000');
 });
+
+app.use('/api/user',userRoutes);
