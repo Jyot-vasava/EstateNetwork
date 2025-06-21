@@ -19,6 +19,9 @@ const Header = () => {
             </form>
             <ul className='flex gap-3'>
                 <Link to='/signup'>
+                <li className=' text-slate-700 hover:underline'>Sign Up</li>
+                </Link>
+                <Link to='/signin'>
                 <li className=' text-slate-700 hover:underline'>Sign In</li>
                 </Link>
                 <Link to='/'>
