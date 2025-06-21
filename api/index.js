@@ -8,6 +8,7 @@ import authRoutes from './routes/auth.routes.js';
 dotenv.config(); 
 
 const app = express();
+app.use(express.json());
 
 mongoose.connect(process.env.MONGO_URI)
 .then(() => console.log('MongoDB connected'))
@@ -32,3 +33,17 @@ app.use((err,req,res,next) =>{
     message
   });
 });
+
+
+app.post("/api/signup", async (req, res) => {
+  const { username, email, password } = req.body;
+
+  try {
+    const user = new User({ username, email, password });
+    await user.save();
+    res.status(201).json({ message: "User registered" });
+  } catch (err) {
+    res.status(500).json({ error: "Failed to register user" });
+  }
+});
+
