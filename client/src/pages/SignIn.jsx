@@ -1,11 +1,8 @@
 import React from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import {
-  signInStart,
-  signInSuccess,
-  signInFailure,
-} from "../redux/user/userSlice";
+import { signInStart, signInSuccess, signInFailure, } from "../redux/user/userSlice";
+import RAuth from "../components/RAuth";
 
 const SignIn = () => {
   const dispatch = useDispatch();
@@ -82,6 +79,7 @@ const SignIn = () => {
         >
           {loading ? "Signing In..." : "Sign In"}
         </button>
+        <RAuth />
       </form>
       <div className="flex gap-2 mt-6 text-gray-600">
         <p>Don't have an account?</p>

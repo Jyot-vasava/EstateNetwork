@@ -1,5 +1,6 @@
 import React from "react";
 import { useNavigate, Link } from "react-router-dom";
+import RAuth from "../components/RAuth";
 
 const SignUp = () => {
   const [error, setError] = React.useState(null);
@@ -37,7 +38,6 @@ const SignUp = () => {
         setLoading(false);
         setError(data.message);
         return;
-
       }
 
       setLoading(false);
@@ -84,6 +84,7 @@ const SignUp = () => {
         >
           {loading ? "Signing Up..." : "Sign Up"}
         </button>
+        <RAuth />
       </form>
       <div className="flex gap-2 mt-6 text-gray-600">
         <p>Have an account?</p>
