@@ -18,7 +18,11 @@ const Profile = () => {
     username: user?.username || "",
     email: user?.email || "",
     password: "",
+    profileImage: user?.image || "",
+
   });
+
+  console.log(formData);
   const [profileImage, setProfileImage] = useState(user?.image);
   const [imageFile, setImageFile] = useState(null);
   const [message, setMessage] = useState("");
@@ -74,53 +78,28 @@ const Profile = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setMessage("");
-    dispatch(updateUserStart());
-
     try {
-      let imageUrl = user.image;
-
-      // Upload new image if selected
-      if (imageFile) {
-        imageUrl = await uploadImageToCloudinary(imageFile);
-      }
-
-      const updateData = {
-        username: formData.username,
-        email: formData.email,
-        image: imageUrl,
-      };
-
-      // Only include password if it was changed
-      if (formData.password) {
-        updateData.password = formData.password;
-      }
-
-      const response = await fetch(`/api/user/update/${user._id}`, {
-        method: "PUT",
+      dispatch(updateUserStart());
+      const res = await fetch(`/api/user/update/${user._id}`, {
+        method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        credentials: "include", // Include cookies
-        body: JSON.stringify(updateData),
+        body: JSON.stringify(formData),
       });
-
-      const data = await response.json();
-
-      if (data.success) {
-        dispatch(updateUserSuccess(data.user));
-        setMessage("Profile updated successfully!");
-        setFormData({ ...formData, password: "" });
-        setImageFile(null);
-      } else {
+      const data = await res.json();
+      if (data.success==false) {
         dispatch(updateUserFailure(data.message));
-        setMessage(data.message || "Failed to update profile");
+      return;
       }
+      dispatch(updateUserSuccess(data));
+
     } catch (error) {
+      //console.error("Error updating profile:", error);
       dispatch(updateUserFailure(error.message));
-      setMessage("An error occurred while updating profile");
+      
     }
-  };
+  }
 
   const handleDeleteAccount = async () => {
     if (
