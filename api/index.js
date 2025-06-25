@@ -4,27 +4,28 @@ import mongoose from 'mongoose';
 import dotenv from 'dotenv';
 import userRoutes from './routes/user.routes.js';
 import authRoutes from './routes/auth.routes.js';
+import { v2 as cloudinary } from 'cloudinary';
 
-dotenv.config(); 
+dotenv.config();
 
 const app = express();
 app.use(express.json());
 
 mongoose.connect(process.env.MONGO_URI)
-.then(() => console.log('MongoDB connected'))
-.catch((err) => console.error('MongoDB connection error:', err));
+  .then(() => console.log('MongoDB connected'))
+  .catch((err) => console.error('MongoDB connection error:', err));
 
 app.use(express.json());
 app.listen(3000, () => {
   console.log('API server is running on http://localhost:3000');
 });
 
-app.use('/api/user',userRoutes);
+app.use('/api/user', userRoutes);
 app.use('/api/auth', authRoutes);
 
 
 //built-in error handler middleware
-app.use((err,req,res,next) =>{
+app.use((err, req, res, next) => {
   const statusCode = err.statusCode || 500;
   const message = err.message || 'Internal Server Error';
   return res.status(statusCode).json({
@@ -46,4 +47,39 @@ app.post("/api/signup", async (req, res) => {
     res.status(500).json({ error: "Failed to register user" });
   }
 });
+
+
+
+
+//clodinaty setup
+
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
+  secure: true
+});
+
+
+(async function () {
+
+  const result = await cloudinary.api.resources({
+    type: 'upload',
+    prefix: 'uploads/',
+    max_results: 10,
+    resource_type: 'image'
+  });
+
+})();
+
+
+
+
+
+
+
+
+
+
+
 
