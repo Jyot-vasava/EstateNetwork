@@ -13,51 +13,27 @@ export const updateUser = async (req, res, next) => {
     }
 
     try {
-        const { username, email, password, image } = req.body;
+       if(req.body.password){
+        req.body.password = bcryptjs.hashSync(req.body.password,10);
+       }
 
-        // Check if username or email already exists (excluding current user)
-        if (username) {
-            const existingUser = await User.findOne({
-                username,
-                _id: { $ne: req.params.id },
-            });
-            if (existingUser) {
-                return next(errorHandler(400, "Username already exists"));
-            }
-        }
 
-        if (email) {
-            const existingUser = await User.findOne({
-                email,
-                _id: { $ne: req.params.id },
-            });
-            if (existingUser) {
-                return next(errorHandler(400, "Email already exists"));
-            }
-        }
+       const updatedUser = await User .findByIdAndUpdate(
+        req.params.id,
+        {
+            $set:{
+                username: req.body.username,
+                email: req.body.email,
+                password: req.body.password,
+                profilePicture: req.body.profilePicture,
+            },
+        },
+        { new: true }
+       );
 
-        const updateData = {};
+       const { password, ...rest } = updatedUser._doc;
 
-        if (username) updateData.username = username;
-        if (email) updateData.email = email;
-        if (image) updateData.image = image;
-
-        // Hash password if provided
-        if (password) {
-            updateData.password = bcryptjs.hashSync(password, 10);
-        }
-
-        const updatedUser = await User.findByIdAndUpdate(
-            req.params.id,
-            { $set: updateData },
-            { new: true }
-        ).select("-password"); // Exclude password from response
-
-        res.status(200).json({
-            success: true,
-            message: "Profile updated successfully",
-            user: updatedUser,
-        });
+       res.status(200).json(rest);
     } catch (error) {
         next(error);
     }
