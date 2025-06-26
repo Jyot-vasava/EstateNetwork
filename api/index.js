@@ -8,6 +8,8 @@ import { v2 as cloudinary } from 'cloudinary';
 import cookieParser from 'cookie-parser';
 
 
+
+
 dotenv.config();
 
 const app = express();
@@ -18,7 +20,7 @@ mongoose.connect(process.env.MONGO_URI)
   .then(() => console.log('MongoDB connected'))
   .catch((err) => console.error('MongoDB connection error:', err));
 
-app.use(express.json());
+
 app.listen(3000, () => {
   console.log('API server is running on http://localhost:3000');
 });
