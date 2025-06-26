@@ -4,6 +4,7 @@ import mongoose from 'mongoose';
 import dotenv from 'dotenv';
 import userRoutes from './routes/user.routes.js';
 import authRoutes from './routes/auth.routes.js';
+import listRoutes from './routes/listing.routes.js';
 import { v2 as cloudinary } from 'cloudinary';
 import cookieParser from 'cookie-parser';
 
@@ -27,6 +28,7 @@ app.listen(3000, () => {
 
 app.use('/api/user', userRoutes);
 app.use('/api/auth', authRoutes);
+app.use('/api/listing', listRoutes);
 
 
 

@@ -9,6 +9,7 @@ import {
   deleteUserFailure,
   signOut,
 } from "../redux/user/userSlice";
+import { Link } from "react-router-dom";
 
 const Profile = () => {
   const { user, loading, error } = useSelector((state) => state.user);
@@ -88,16 +89,16 @@ const Profile = () => {
         body: JSON.stringify(formData),
       });
       const data = await res.json();
-      if (data.success==false) {
+      if (data.success == false) {
         dispatch(updateUserFailure(data.message));
-      return;
+        return;
       }
       dispatch(updateUserSuccess(data));
 
     } catch (error) {
       //console.error("Error updating profile:", error);
       dispatch(updateUserFailure(error.message));
-      
+
     }
   }
 
@@ -239,6 +240,13 @@ const Profile = () => {
           >
             {loading ? "Updating..." : "Update Profile"}
           </button>
+
+          <Link to={"/create-listing"}>
+            <button className="w-full bg-blue-500 text-white py-3 rounded-lg font-semibold uppercase hover:opacity-75 transition disabled:opacity-50">
+              Create New Listing
+            </button>
+          </Link>
+          
         </form>
 
         <div className="flex justify-between mt-6 text-sm">
