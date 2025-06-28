@@ -9,6 +9,7 @@ import Header from "./components/Header";
 import PrivateRoute from "./components/privateRoute";
 
 
+
 function App() {
   
 
@@ -24,6 +25,7 @@ function App() {
         <Route element={<PrivateRoute />}>
           <Route path="/profile" element={<Profile />} />
           <Route path="/create-listing" element={<CreateListing />} />
+          <Route path="/create-listing/:id" element={<CreateListing />} />
         </Route>
       </Routes>
     </BrowserRouter>

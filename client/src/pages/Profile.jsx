@@ -19,14 +19,19 @@ const Profile = () => {
     username: user?.username || "",
     email: user?.email || "",
     password: "",
-    profilePicture: user?.profilePicture || "", // Fixed: changed from profileImage to profilePicture
+    profilePicture: user?.profilePicture || "",
   });
 
   console.log(formData);
-  const [profileImage, setProfileImage] = useState(user?.profilePicture); // Fixed: changed from image to profilePicture
+  const [profileImage, setProfileImage] = useState(user?.profilePicture);
   const [imageFile, setImageFile] = useState(null);
   const [message, setMessage] = useState("");
-  const [uploadingImage, setUploadingImage] = useState(false); // Added loading state for image upload
+  const [uploadingImage, setUploadingImage] = useState(false);
+  const [mylistingserror, setMylistingserror] = useState(false);
+  const [userslistings, setUserslistings] = useState([]);
+  const [showListings, setShowListings] = useState(false);
+  const [loadingListings, setLoadingListings] = useState(false);
+  const [viewMode, setViewMode] = useState("grid"); // New state for view mode
   const fileInputRef = useRef(null);
 
   const handleInputChange = (e) => {
@@ -44,7 +49,6 @@ const Profile = () => {
     const file = e.target.files[0];
     if (file) {
       setImageFile(file);
-      // Create preview
       const reader = new FileReader();
       reader.onload = () => {
         setProfileImage(reader.result);
@@ -54,7 +58,7 @@ const Profile = () => {
   };
 
   const uploadImageToCloudinary = async (file) => {
-    const formDataImg = new FormData(); // Renamed to avoid conflict
+    const formDataImg = new FormData();
     formDataImg.append("file", file);
     formDataImg.append(
       "upload_preset",
@@ -87,7 +91,6 @@ const Profile = () => {
 
       let updatedFormData = { ...formData };
 
-      // Upload image to Cloudinary if a new image was selected
       if (imageFile) {
         try {
           setUploadingImage(true);
@@ -105,7 +108,6 @@ const Profile = () => {
         }
       }
 
-      // Remove password from request if it's empty
       if (!updatedFormData.password) {
         delete updatedFormData.password;
       }
@@ -115,7 +117,7 @@ const Profile = () => {
         headers: {
           "Content-Type": "application/json",
         },
-        credentials: "include", // Added credentials
+        credentials: "include",
         body: JSON.stringify(updatedFormData),
       });
 
@@ -128,9 +130,8 @@ const Profile = () => {
 
       dispatch(updateUserSuccess(data));
       setMessage("Profile updated successfully!");
-      setImageFile(null); // Clear the selected file
+      setImageFile(null);
 
-      // Update the form data with the response
       setFormData({
         username: data.username || "",
         email: data.email || "",
@@ -171,6 +172,80 @@ const Profile = () => {
     }
   };
 
+  const handleMyListings = async () => {
+    try {
+      setLoadingListings(true);
+      setMylistingserror(false);
+      setMessage("");
+
+      console.log("Fetching listings for user:", user._id);
+
+      const response = await fetch(`/api/listing/user/${user._id}`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+      });
+
+      console.log("Response status:", response.status);
+      console.log("Response ok:", response.ok);
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data = await response.json();
+      console.log("Response data:", data);
+
+      if (data.success === false) {
+        setMylistingserror(true);
+        setMessage(data.message || "Failed to fetch listings");
+        return;
+      }
+
+      const listings = Array.isArray(data)
+        ? data
+        : data.listings || data.data || [];
+      setUserslistings(listings);
+      setShowListings(true);
+
+      if (listings.length === 0) {
+        setMessage("No listings found");
+      }
+    } catch (error) {
+      console.error("Error fetching listings:", error);
+      setMylistingserror(true);
+      setMessage(`Error fetching listings: ${error.message}`);
+    } finally {
+      setLoadingListings(false);
+    }
+  };
+
+  const handleDeleteListing = async (listingId) => {
+    if (window.confirm("Are you sure you want to delete this listing?")) {
+      try {
+        const response = await fetch(`/api/listing/delete/${listingId}`, {
+          method: "DELETE",
+          credentials: "include",
+        });
+
+        const data = await response.json();
+
+        if (data.success !== false) {
+          setUserslistings(
+            userslistings.filter((listing) => listing._id !== listingId)
+          );
+          setMessage("Listing deleted successfully!");
+        } else {
+          setMessage(data.message || "Failed to delete listing");
+        }
+      } catch (error) {
+        setMessage("Error deleting listing");
+      }
+    }
+  };
+
   const handleSignOut = async () => {
     try {
       await fetch("/api/auth/signout", {
@@ -183,126 +258,739 @@ const Profile = () => {
     }
   };
 
+  // Helper function to format price
+  const formatPrice = (listing) => {
+    const price = listing.regularPrice || listing.discountedprice || 0;
+    return new Intl.NumberFormat("en-US", {
+      style: "currency",
+      currency: "USD",
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0,
+    }).format(price);
+  };
+
+  // Helper function to get listing status
+  const getListingStatus = (listing) => {
+    const createdAt = new Date(listing.createdAt);
+    const now = new Date();
+    const daysDiff = Math.floor((now - createdAt) / (1000 * 60 * 60 * 24));
+
+    if (daysDiff < 7) return { text: "New", color: "bg-green-500" };
+    if (daysDiff < 30) return { text: "Active", color: "bg-blue-500" };
+    return { text: "Older", color: "bg-gray-500" };
+  };
+
   return (
-    <div className="max-w-xl mx-auto p-6">
-      <div className="bg-slate-100 rounded-2xl shadow-xl p-8 relative">
-        <form onSubmit={handleSubmit} className="mt-8 space-y-6">
-          <div className="flex flex-col items-center">
-            <div
-              className="relative w-32 h-32 rounded-full overflow-hidden shadow-md hover:scale-105 transition-transform cursor-pointer group"
-              onClick={handleImageClick}
-            >
-              <img
-                src={profileImage || user?.image}
-                alt="Profile"
-                className="w-full h-full object-cover"
+    <div className="max-w-7xl mx-auto p-6">
+      <div className="bg-gradient-to-br from-slate-50 to-slate-100 rounded-3xl shadow-2xl p-8 relative overflow-hidden">
+        {/* Background decoration */}
+        <div className="absolute top-0 right-0 w-40 h-40 bg-gradient-to-br from-blue-200/30 to-purple-200/30 rounded-full blur-3xl"></div>
+        <div className="absolute bottom-0 left-0 w-32 h-32 bg-gradient-to-tr from-green-200/30 to-blue-200/30 rounded-full blur-2xl"></div>
+
+        {!showListings ? (
+          // Profile Form (keeping existing form code)
+          <form
+            onSubmit={handleSubmit}
+            className="mt-8 space-y-6 relative z-10"
+          >
+            <div className="flex flex-col items-center">
+              <div
+                className="relative w-32 h-32 rounded-full overflow-hidden shadow-lg hover:scale-105 transition-transform cursor-pointer group ring-4 ring-white"
+                onClick={handleImageClick}
+              >
+                <img
+                  src={profileImage || user?.image}
+                  alt="Profile"
+                  className="w-full h-full object-cover"
+                />
+                <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                  <span className="text-white text-sm font-medium">
+                    Change Photo
+                  </span>
+                </div>
+              </div>
+              <input
+                type="file"
+                ref={fileInputRef}
+                onChange={handleImageChange}
+                accept="image/*"
+                className="hidden"
               />
-              <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                <span className="text-white text-sm font-medium">
-                  Change Photo
-                </span>
+              <h1 className="text-3xl font-bold mt-4 bg-gradient-to-r from-slate-700 to-slate-900 bg-clip-text text-transparent">
+                {formData.username}
+              </h1>
+              <p className="text-gray-500 text-sm">{formData.email}</p>
+            </div>
+
+            {message && (
+              <div
+                className={`p-4 rounded-xl text-center shadow-md ${
+                  message.includes("successfully")
+                    ? "bg-gradient-to-r from-green-50 to-emerald-50 text-green-700 border border-green-200"
+                    : "bg-gradient-to-r from-red-50 to-rose-50 text-red-700 border border-red-200"
+                }`}
+              >
+                {message}
+              </div>
+            )}
+
+            {error && (
+              <div className="p-4 rounded-xl text-center bg-gradient-to-r from-red-50 to-rose-50 text-red-700 border border-red-200">
+                {error}
+              </div>
+            )}
+
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-2">
+                Username
+              </label>
+              <input
+                type="text"
+                id="username"
+                value={formData.username}
+                onChange={handleInputChange}
+                className="w-full p-4 rounded-xl border-2 border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent transition-all shadow-sm"
+                required
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-2">
+                Email
+              </label>
+              <input
+                type="email"
+                id="email"
+                value={formData.email}
+                onChange={handleInputChange}
+                className="w-full p-4 rounded-xl border-2 border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent transition-all shadow-sm"
+                required
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-2">
+                Password (leave blank to keep current)
+              </label>
+              <input
+                type="password"
+                id="password"
+                value={formData.password}
+                onChange={handleInputChange}
+                className="w-full p-4 rounded-xl border-2 border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent transition-all shadow-sm"
+                placeholder="Enter new password"
+              />
+            </div>
+
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-full bg-gradient-to-r from-blue-500 to-blue-600 text-white py-4 rounded-xl font-semibold uppercase hover:from-blue-600 hover:to-blue-700 transition-all transform hover:scale-[1.02] disabled:opacity-50 shadow-lg"
+            >
+              {loading ? "Updating..." : "Update Profile"}
+            </button>
+
+            <Link to={"/create-listing"}>
+              <button className="w-full bg-gradient-to-r from-green-500 to-green-600 text-white py-4 rounded-xl font-semibold uppercase hover:from-green-600 hover:to-green-700 transition-all transform hover:scale-[1.02] shadow-lg">
+                Create New Listing
+              </button>
+            </Link>
+
+            <div className="flex justify-between mt-8 text-sm">
+              <span
+                onClick={handleDeleteAccount}
+                className="text-red-500 hover:text-red-600 cursor-pointer font-medium transition-colors"
+              >
+                Delete Account
+              </span>
+              <span
+                onClick={handleMyListings}
+                className="text-slate-600 hover:text-slate-800 cursor-pointer font-medium transition-colors"
+              >
+                {loadingListings ? "Loading..." : "My Listings"}
+              </span>
+              <span
+                onClick={handleSignOut}
+                className="text-blue-500 hover:text-blue-600 cursor-pointer font-medium transition-colors"
+              >
+                Sign Out
+              </span>
+            </div>
+
+            {mylistingserror && (
+              <p className="text-red-500 text-center text-sm mt-2">
+                Error showing listings
+              </p>
+            )}
+          </form>
+        ) : (
+          // Enhanced Listings View
+          <div className="mt-8 relative z-10">
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 space-y-4 md:space-y-0">
+              <div>
+                <h2 className="text-3xl font-bold bg-gradient-to-r from-slate-700 to-slate-900 bg-clip-text text-transparent">
+                  My Listings
+                </h2>
+                <p className="text-gray-600 mt-1">
+                  {userslistings.length}{" "}
+                  {userslistings.length === 1 ? "property" : "properties"}{" "}
+                  listed
+                </p>
+              </div>
+
+              <div className="flex items-center space-x-4">
+                {/* View mode toggle */}
+                <div className="flex bg-white rounded-xl p-1 shadow-md">
+                  <button
+                    onClick={() => setViewMode("grid")}
+                    className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+                      viewMode === "grid"
+                        ? "bg-blue-500 text-white shadow-md"
+                        : "text-gray-600 hover:text-gray-800"
+                    }`}
+                  >
+                    Grid
+                  </button>
+                  <button
+                    onClick={() => setViewMode("list")}
+                    className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+                      viewMode === "list"
+                        ? "bg-blue-500 text-white shadow-md"
+                        : "text-gray-600 hover:text-gray-800"
+                    }`}
+                  >
+                    List
+                  </button>
+                </div>
+
+                <button
+                  onClick={() => setShowListings(false)}
+                  className="bg-gradient-to-r from-gray-500 to-gray-600 text-white px-6 py-3 rounded-xl hover:from-gray-600 hover:to-gray-700 transition-all transform hover:scale-105 shadow-lg font-medium"
+                >
+                  Back to Profile
+                </button>
               </div>
             </div>
-            <input
-              type="file"
-              ref={fileInputRef}
-              onChange={handleImageChange}
-              accept="image/*"
-              className="hidden"
-            />
-            <h1 className="text-2xl font-bold mt-4">{formData.username}</h1>
-            <p className="text-gray-500 text-sm">{formData.email}</p>
+
+            {message && (
+              <div
+                className={`p-4 rounded-xl text-center mb-6 shadow-md ${
+                  message.includes("successfully")
+                    ? "bg-gradient-to-r from-green-50 to-emerald-50 text-green-700 border border-green-200"
+                    : "bg-gradient-to-r from-red-50 to-rose-50 text-red-700 border border-red-200"
+                }`}
+              >
+                {message}
+              </div>
+            )}
+
+            {userslistings.length === 0 ? (
+              <div className="text-center py-16">
+                <div className="w-24 h-24 mx-auto mb-6 bg-gradient-to-br from-gray-200 to-gray-300 rounded-full flex items-center justify-center">
+                  <svg
+                    className="w-12 h-12 text-gray-400"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"
+                    />
+                  </svg>
+                </div>
+                <h3 className="text-2xl font-bold text-gray-700 mb-2">
+                  No listings yet
+                </h3>
+                <p className="text-gray-500 text-lg mb-6">
+                  Start your real estate journey by creating your first listing
+                </p>
+                <Link to="/create-listing">
+                  <button className="bg-gradient-to-r from-blue-500 to-blue-600 text-white px-8 py-4 rounded-xl hover:from-blue-600 hover:to-blue-700 transition-all transform hover:scale-105 shadow-lg font-semibold">
+                    Create Your First Listing
+                  </button>
+                </Link>
+              </div>
+            ) : (
+              <div
+                className={
+                  viewMode === "grid"
+                    ? "grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6"
+                    : "space-y-4"
+                }
+              >
+                {userslistings.map((listing) => {
+                  const status = getListingStatus(listing);
+
+                  if (viewMode === "grid") {
+                    return (
+                      <div
+                        key={listing._id}
+                        className="bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-xl transition-all duration-300 transform hover:scale-[1.02] group"
+                      >
+                        {/* Image Container */}
+                        <div className="relative h-56 overflow-hidden">
+                          {listing.imageUrls && listing.imageUrls[0] ? (
+                            <img
+                              src={listing.imageUrls[0]}
+                              alt={listing.name}
+                              className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                            />
+                          ) : (
+                            <div className="w-full h-full bg-gradient-to-br from-gray-200 to-gray-300 flex items-center justify-center">
+                              <svg
+                                className="w-16 h-16 text-gray-400"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                              >
+                                <path
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                  strokeWidth={2}
+                                  d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
+                                />
+                              </svg>
+                            </div>
+                          )}
+
+                          {/* Status Badge */}
+                          <div
+                            className={`absolute top-4 left-4 ${status.color} text-white px-3 py-1 rounded-full text-xs font-semibold shadow-lg`}
+                          >
+                            {status.text}
+                          </div>
+
+                          {/* Type Badge */}
+                          <div className="absolute top-4 right-4 bg-black/70 text-white px-3 py-1 rounded-full text-xs font-semibold capitalize">
+                            {listing.type}
+                          </div>
+
+                          {/* Overlay gradient */}
+                          <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                        </div>
+
+                        {/* Content */}
+                        <div className="p-6">
+                          <div className="flex justify-between items-start mb-3">
+                            <h3 className="text-xl font-bold text-gray-800 line-clamp-2 group-hover:text-blue-600 transition-colors">
+                              {listing.name}
+                            </h3>
+                          </div>
+
+                          <p className="text-gray-600 text-sm mb-3 flex items-center">
+                            <svg
+                              className="w-4 h-4 mr-1 text-gray-400"
+                              fill="none"
+                              stroke="currentColor"
+                              viewBox="0 0 24 24"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
+                              />
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
+                              />
+                            </svg>
+                            {listing.address}
+                          </p>
+
+                          <div className="flex items-center justify-between mb-4">
+                            <div className="text-2xl font-bold text-blue-600">
+                              {formatPrice(listing)}
+                              {listing.type === "rent" && (
+                                <span className="text-sm text-gray-500 font-normal">
+                                  /month
+                                </span>
+                              )}
+                            </div>
+                            {listing.offer && (
+                              <span className="bg-red-100 text-red-600 px-2 py-1 rounded-lg text-xs font-semibold">
+                                Special Offer
+                              </span>
+                            )}
+                          </div>
+
+                          {/* Property Features */}
+                          <div className="grid grid-cols-2 gap-3 mb-4 text-sm">
+                            <div className="flex items-center text-gray-600">
+                              <svg
+                                className="w-4 h-4 mr-2 text-gray-400"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                              >
+                                <path
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                  strokeWidth={2}
+                                  d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2H5a2 2 0 00-2-2z"
+                                />
+                                <path
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                  strokeWidth={2}
+                                  d="M8 21v-4a2 2 0 012-2h4a2 2 0 012 2v4"
+                                />
+                              </svg>
+                              {listing.bedrooms} Bed
+                              {listing.bedrooms !== 1 ? "s" : ""}
+                            </div>
+                            <div className="flex items-center text-gray-600">
+                              <svg
+                                className="w-4 h-4 mr-2 text-gray-400"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                              >
+                                <path
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                  strokeWidth={2}
+                                  d="M8 14v3m4-3v3m4-3v3M3 21h18M3 10h18M10.5 3L12 2l1.5 1M21 3l-9 9-9-9"
+                                />
+                              </svg>
+                              {listing.bathrooms} Bath
+                              {listing.bathrooms !== 1 ? "s" : ""}
+                            </div>
+                            {listing.parking && (
+                              <div className="flex items-center text-gray-600">
+                                <svg
+                                  className="w-4 h-4 mr-2 text-gray-400"
+                                  fill="none"
+                                  stroke="currentColor"
+                                  viewBox="0 0 24 24"
+                                >
+                                  <path
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    strokeWidth={2}
+                                    d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"
+                                  />
+                                </svg>
+                                Parking
+                              </div>
+                            )}
+                            {listing.furnished && (
+                              <div className="flex items-center text-gray-600">
+                                <svg
+                                  className="w-4 h-4 mr-2 text-gray-400"
+                                  fill="none"
+                                  stroke="currentColor"
+                                  viewBox="0 0 24 24"
+                                >
+                                  <path
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    strokeWidth={2}
+                                    d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"
+                                  />
+                                </svg>
+                                Furnished
+                              </div>
+                            )}
+                          </div>
+
+                          {/* Description Preview */}
+                          {listing.description && (
+                            <p className="text-gray-600 text-sm mb-4 line-clamp-2">
+                              {listing.description}
+                            </p>
+                          )}
+
+                          {/* Action Buttons */}
+                          <div className="flex space-x-2">
+                            <Link
+                              to={`/listing/${listing._id}`}
+                              className="flex-1"
+                            >
+                              <button className="w-full bg-blue-500 text-white py-2 px-3 rounded-lg text-sm hover:bg-blue-600 transition-colors font-medium">
+                                View
+                              </button>
+                            </Link>
+                            <Link
+                              to={`/create-listing/${listing._id}`}
+                              className="flex-1"
+                            >
+                              <button className="w-full bg-green-500 text-white py-2 px-3 rounded-lg text-sm hover:bg-green-600 transition-colors font-medium">
+                                Edit
+                              </button>
+                            </Link>
+                            <button
+                              onClick={() => handleDeleteListing(listing._id)}
+                              className="bg-red-500 text-white py-2 px-3 rounded-lg text-sm hover:bg-red-600 transition-colors font-medium"
+                            >
+                              Delete
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  } else {
+                    // List View
+                    return (
+                      <div
+                        key={listing._id}
+                        className="bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-xl transition-all duration-300 group"
+                      >
+                        <div className="flex flex-col md:flex-row">
+                          {/* Image */}
+                          <div className="relative md:w-80 h-64 md:h-auto overflow-hidden">
+                            {listing.imageUrls && listing.imageUrls[0] ? (
+                              <img
+                                src={listing.imageUrls[0]}
+                                alt={listing.name}
+                                className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                              />
+                            ) : (
+                              <div className="w-full h-full bg-gradient-to-br from-gray-200 to-gray-300 flex items-center justify-center">
+                                <svg
+                                  className="w-16 h-16 text-gray-400"
+                                  fill="none"
+                                  stroke="currentColor"
+                                  viewBox="0 0 24 24"
+                                >
+                                  <path
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    strokeWidth={2}
+                                    d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
+                                  />
+                                </svg>
+                              </div>
+                            )}
+
+                            {/* Status Badge */}
+                            <div
+                              className={`absolute top-4 left-4 ${status.color} text-white px-3 py-1 rounded-full text-xs font-semibold shadow-lg`}
+                            >
+                              {status.text}
+                            </div>
+
+                            {/* Type Badge */}
+                            <div className="absolute top-4 right-4 bg-black/70 text-white px-3 py-1 rounded-full text-xs font-semibold capitalize">
+                              {listing.type}
+                            </div>
+                          </div>
+
+                          {/* Content */}
+                          <div className="flex-1 p-6">
+                            <div className="flex flex-col h-full">
+                              <div className="flex justify-between items-start mb-3">
+                                <h3 className="text-2xl font-bold text-gray-800 group-hover:text-blue-600 transition-colors">
+                                  {listing.name}
+                                </h3>
+                                {listing.offer && (
+                                  <span className="bg-red-100 text-red-600 px-3 py-1 rounded-lg text-sm font-semibold">
+                                    Special Offer
+                                  </span>
+                                )}
+                              </div>
+
+                              <p className="text-gray-600 mb-3 flex items-center">
+                                <svg
+                                  className="w-4 h-4 mr-2 text-gray-400"
+                                  fill="none"
+                                  stroke="currentColor"
+                                  viewBox="0 0 24 24"
+                                >
+                                  <path
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    strokeWidth={2}
+                                    d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
+                                  />
+                                  <path
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    strokeWidth={2}
+                                    d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
+                                  />
+                                </svg>
+                                {listing.address}
+                              </p>
+
+                              <div className="text-3xl font-bold text-blue-600 mb-4">
+                                {formatPrice(listing)}
+                                {listing.type === "rent" && (
+                                  <span className="text-lg text-gray-500 font-normal">
+                                    /month
+                                  </span>
+                                )}
+                              </div>
+
+                              {/* Description */}
+                              {listing.description && (
+                                <p className="text-gray-600 mb-4 line-clamp-3">
+                                  {listing.description}
+                                </p>
+                              )}
+
+                              {/* Property Features */}
+                              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6 text-sm">
+                                <div className="flex items-center text-gray-600">
+                                  <svg
+                                    className="w-5 h-5 mr-2 text-gray-400"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    viewBox="0 0 24 24"
+                                  >
+                                    <path
+                                      strokeLinecap="round"
+                                      strokeLinejoin="round"
+                                      strokeWidth={2}
+                                      d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2H5a2 2 0 00-2-2z"
+                                    />
+                                    <path
+                                      strokeLinecap="round"
+                                      strokeLinejoin="round"
+                                      strokeWidth={2}
+                                      d="M8 21v-4a2 2 0 012-2h4a2 2 0 012 2v4"
+                                    />
+                                  </svg>
+                                  <span className="font-medium">
+                                    {listing.bedrooms}
+                                  </span>
+                                  <span className="ml-1">
+                                    Bed{listing.bedrooms !== 1 ? "s" : ""}
+                                  </span>
+                                </div>
+                                <div className="flex items-center text-gray-600">
+                                  <svg
+                                    className="w-5 h-5 mr-2 text-gray-400"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    viewBox="0 0 24 24"
+                                  >
+                                    <path
+                                      strokeLinecap="round"
+                                      strokeLinejoin="round"
+                                      strokeWidth={2}
+                                      d="M8 14v3m4-3v3m4-3v3M3 21h18M3 10h18M10.5 3L12 2l1.5 1M21 3l-9 9-9-9"
+                                    />
+                                  </svg>
+                                  <span className="font-medium">
+                                    {listing.bathrooms}
+                                  </span>
+                                  <span className="ml-1">
+                                    Bath{listing.bathrooms !== 1 ? "s" : ""}
+                                  </span>
+                                </div>
+                                {listing.parking && (
+                                  <div className="flex items-center text-gray-600">
+                                    <svg
+                                      className="w-5 h-5 mr-2 text-green-500"
+                                      fill="none"
+                                      stroke="currentColor"
+                                      viewBox="0 0 24 24"
+                                    >
+                                      <path
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                        strokeWidth={2}
+                                        d="M5 13l4 4L19 7"
+                                      />
+                                    </svg>
+                                    <span>Parking</span>
+                                  </div>
+                                )}
+                                {listing.furnished && (
+                                  <div className="flex items-center text-gray-600">
+                                    <svg
+                                      className="w-5 h-5 mr-2 text-green-500"
+                                      fill="none"
+                                      stroke="currentColor"
+                                      viewBox="0 0 24 24"
+                                    >
+                                      <path
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                        strokeWidth={2}
+                                        d="M5 13l4 4L19 7"
+                                      />
+                                    </svg>
+                                    <span>Furnished</span>
+                                  </div>
+                                )}
+                              </div>
+
+                              {/* Additional Details */}
+                              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6 text-sm">
+                                {listing.regularPrice &&
+                                  listing.discountedprice &&
+                                  listing.regularPrice !==
+                                    listing.discountedprice && (
+                                    <div className="flex items-center">
+                                      <span className="text-gray-500">
+                                        Regular Price:
+                                      </span>
+                                      <span className="ml-2 line-through text-gray-400">
+                                        {formatPrice({
+                                          regularPrice: listing.regularPrice,
+                                        })}
+                                      </span>
+                                    </div>
+                                  )}
+                                {listing.createdAt && (
+                                  <div className="flex items-center">
+                                    <span className="text-gray-500">
+                                      Listed:
+                                    </span>
+                                    <span className="ml-2 font-medium">
+                                      {new Date(
+                                        listing.createdAt
+                                      ).toLocaleDateString()}
+                                    </span>
+                                  </div>
+                                )}
+                              </div>
+
+                              {/* Action Buttons */}
+                              <div className="flex space-x-3 mt-auto">
+                                <Link
+                                  to={`/listing/${listing._id}`}
+                                  className="flex-1"
+                                >
+                                  <button className="w-full bg-blue-500 text-white py-3 px-4 rounded-xl hover:bg-blue-600 transition-colors font-medium shadow-md hover:shadow-lg transform hover:scale-[1.02]">
+                                    View Details
+                                  </button>
+                                </Link>
+                                <Link
+                                  to={`/create-listing/${listing._id}`}
+                                  className="flex-1"
+                                >
+                                  <button className="w-full bg-green-500 text-white py-3 px-4 rounded-xl hover:bg-green-600 transition-colors font-medium shadow-md hover:shadow-lg transform hover:scale-[1.02]">
+                                    Edit Listing
+                                  </button>
+                                </Link>
+                                <button
+                                  onClick={() =>
+                                    handleDeleteListing(listing._id)
+                                  }
+                                  className="bg-red-500 text-white py-3 px-4 rounded-xl hover:bg-red-600 transition-colors font-medium shadow-md hover:shadow-lg transform hover:scale-[1.02]"
+                                >
+                                  Delete
+                                </button>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  }
+                })}
+              </div>
+            )}
           </div>
-
-          {message && (
-            <div
-              className={`p-3 rounded-lg text-center ${
-                message.includes("successfully")
-                  ? "bg-green-100 text-green-700"
-                  : "bg-red-100 text-red-700"
-              }`}
-            >
-              {message}
-            </div>
-          )}
-
-          {error && (
-            <div className="p-3 rounded-lg text-center bg-red-100 text-red-700">
-              {error}
-            </div>
-          )}
-
-          <div>
-            <label className="block text-sm font-semibold text-gray-700">
-              Username
-            </label>
-            <input
-              type="text"
-              id="username"
-              value={formData.username}
-              onChange={handleInputChange}
-              className="w-full mt-1 p-3 rounded-lg border focus:outline-none focus:ring-2 focus:ring-blue-400 transition-all"
-              required
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-semibold text-gray-700">
-              Email
-            </label>
-            <input
-              type="email"
-              id="email"
-              value={formData.email}
-              onChange={handleInputChange}
-              className="w-full mt-1 p-3 rounded-lg border focus:outline-none focus:ring-2 focus:ring-blue-400 transition-all"
-              required
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-semibold text-gray-700">
-              Password (leave blank to keep current)
-            </label>
-            <input
-              type="password"
-              id="password"
-              value={formData.password}
-              onChange={handleInputChange}
-              className="w-full mt-1 p-3 rounded-lg border focus:outline-none focus:ring-2 focus:ring-blue-400 transition-all"
-              placeholder="Enter new password"
-            />
-          </div>
-
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full bg-blue-500 text-white py-3 rounded-lg font-semibold uppercase hover:opacity-75 transition disabled:opacity-50"
-          >
-            {loading ? "Updating..." : "Update Profile"}
-          </button>
-
-          <Link to={"/create-listing"}>
-            <button className="w-full bg-blue-500 text-white py-3 rounded-lg font-semibold uppercase hover:opacity-75 transition disabled:opacity-50">
-              Create New Listing
-            </button>
-          </Link>
-        </form>
-
-        <div className="flex justify-between mt-6 text-sm">
-          <span
-            onClick={handleDeleteAccount}
-            className="text-red-500 hover:underline cursor-pointer"
-          >
-            Delete Account
-          </span>
-          <span
-            onClick={handleSignOut}
-            className="text-blue-500 hover:underline cursor-pointer"
-          >
-            Sign Out
-          </span>
-        </div>
+        )}
       </div>
     </div>
   );

@@ -13,18 +13,18 @@ const CreateListing = () => {
     type: "rent",
     bedrooms: 1,
     bathrooms: 1,
-    regularprice: 50,
+    regularprice: 500,
     discountedprice: 0,
     offer: false,
     parking: false,
     furnished: false,
+    imageUrls: [],
   });
   const [imageFiles, setImageFiles] = useState([]);
   const [imageUploadError, setImageUploadError] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState(false);
   const [loading, setLoading] = useState(false);
-
   // Common handler for form fields
   const handleChange = (e) => {
     if (e.target.id === "sale" || e.target.id === "rent") {
