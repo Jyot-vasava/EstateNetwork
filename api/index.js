@@ -9,9 +9,7 @@ import cookieParser from "cookie-parser";
 import path from "path";
 
 dotenv.config();
-
 const __dirname = path.resolve();
-
 const app = express();
 
 // Middleware
@@ -19,7 +17,7 @@ app.use(express.json({ limit: "10mb" }));
 app.use(express.urlencoded({ extended: true, limit: "10mb" }));
 app.use(cookieParser());
 
-// CORS middleware (if needed for development)
+// CORS middleware
 app.use((req, res, next) => {
   res.header("Access-Control-Allow-Origin", "http://localhost:5173");
   res.header("Access-Control-Allow-Credentials", "true");
@@ -63,7 +61,6 @@ app.use("/api/listing", listingRoutes);
 // Serve static files in production
 if (process.env.NODE_ENV === "production") {
   app.use(express.static(path.join(__dirname, "/client/dist")));
-
   app.get("*", (req, res) => {
     res.sendFile(path.join(__dirname, "client", "dist", "index.html"));
   });
@@ -73,13 +70,11 @@ if (process.env.NODE_ENV === "production") {
 app.use((err, req, res, next) => {
   const statusCode = err.statusCode || 500;
   const message = err.message || "Internal Server Error";
-
   console.error("Error:", {
     statusCode,
     message,
     stack: err.stack,
   });
-
   return res.status(statusCode).json({
     success: false,
     statusCode,

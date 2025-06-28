@@ -99,9 +99,12 @@ import express from "express";
   router.get("/:id", getListing);
 
   // Update listing - NEW ROUTE
-  router.post("/update/:id", verifyToken, updateListing);
+  router.put("/update/:id", verifyToken, updateListing);
 
   // Delete listing - NEW ROUTE
   router.delete("/delete/:id", verifyToken, deleteListing);
+  
+// Get all listings with search/filter
+router.get('/get', getListing);
 
   export default router;

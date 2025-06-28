@@ -414,13 +414,7 @@ const CreateListing = () => {
     </main>
   );
 
-  // Handle remove image
-  function handleRemoveImage(index) {
-    setFormData({
-      ...formData,
-      imageUrls: formData.imageUrls.filter((_, i) => i !== index),
-    });
-  }
-};
+ 
+}
 
 export default CreateListing;

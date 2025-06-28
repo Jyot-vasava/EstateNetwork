@@ -1,5 +1,5 @@
 import { useSelector, useDispatch } from "react-redux";
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import {
   updateUserStart,
   updateUserSuccess,
@@ -14,7 +14,8 @@ import { Link } from "react-router-dom";
 const Profile = () => {
   const { user, loading, error } = useSelector((state) => state.user);
   const dispatch = useDispatch();
-
+  
+  // Initialize formData with user data
   const [formData, setFormData] = useState({
     username: user?.username || "",
     email: user?.email || "",
@@ -22,16 +23,24 @@ const Profile = () => {
     profilePicture: user?.profilePicture || "",
   });
 
-  console.log(formData);
   const [profileImage, setProfileImage] = useState(user?.profilePicture);
   const [imageFile, setImageFile] = useState(null);
   const [message, setMessage] = useState("");
   const [uploadingImage, setUploadingImage] = useState(false);
-  const [mylistingserror, setMylistingserror] = useState(false);
   const [userslistings, setUserslistings] = useState([]);
   const [showListings, setShowListings] = useState(false);
   const [loadingListings, setLoadingListings] = useState(false);
   const fileInputRef = useRef(null);
+
+  // Update formData when user changes
+  useEffect(() => {
+    setFormData({
+      username: user?.username || "",
+      email: user?.email || "",
+      password: "",
+      profilePicture: user?.profilePicture || "",
+    });
+  }, [user]);
 
   const handleInputChange = (e) => {
     setFormData({
@@ -41,11 +50,11 @@ const Profile = () => {
   };
 
   const handleImageClick = () => {
-    fileInputRef.current.click();
+    fileInputRef.current?.click();
   };
 
   const handleImageChange = (e) => {
-    const file = e.target.files[0];
+    const file = e.target.files?.[0];
     if (file) {
       setImageFile(file);
       const reader = new FileReader();
@@ -59,10 +68,7 @@ const Profile = () => {
   const uploadImageToCloudinary = async (file) => {
     const formDataImg = new FormData();
     formDataImg.append("file", file);
-    formDataImg.append(
-      "upload_preset",
-      process.env.REACT_APP_CLOUDINARY_UPLOAD_PRESET || "unsigned_preset"
-    );
+    formDataImg.append("upload_preset", process.env.REACT_APP_CLOUDINARY_UPLOAD_PRESET);
     formDataImg.append("folder", "profile_images");
 
     try {
@@ -73,6 +79,11 @@ const Profile = () => {
           body: formDataImg,
         }
       );
+      
+      if (!response.ok) {
+        throw new Error("Failed to upload image");
+      }
+      
       const data = await response.json();
       if (data.error) {
         throw new Error(data.error.message);
@@ -87,9 +98,8 @@ const Profile = () => {
     e.preventDefault();
     try {
       dispatch(updateUserStart());
-
       let updatedFormData = { ...formData };
-
+      
       if (imageFile) {
         try {
           setUploadingImage(true);
@@ -98,9 +108,7 @@ const Profile = () => {
           setMessage("Image uploaded successfully!");
         } catch (error) {
           setUploadingImage(false);
-          dispatch(
-            updateUserFailure("Failed to upload image: " + error.message)
-          );
+          dispatch(updateUserFailure("Failed to upload image: " + error.message));
           return;
         } finally {
           setUploadingImage(false);
@@ -111,7 +119,7 @@ const Profile = () => {
         delete updatedFormData.password;
       }
 
-      const res = await fetch(`/api/user/update/${user._id}`, {
+      const response = await fetch(`/api/user/update/${user._id}`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -120,9 +128,9 @@ const Profile = () => {
         body: JSON.stringify(updatedFormData),
       });
 
-      const data = await res.json();
-
-      if (data.success === false || !res.ok) {
+      const data = await response.json();
+      
+      if (!response.ok || data.success === false) {
         dispatch(updateUserFailure(data.message || "Update failed"));
         return;
       }
@@ -130,7 +138,6 @@ const Profile = () => {
       dispatch(updateUserSuccess(data));
       setMessage("Profile updated successfully!");
       setImageFile(null);
-
       setFormData({
         username: data.username || "",
         email: data.email || "",
@@ -144,19 +151,15 @@ const Profile = () => {
   };
 
   const handleDeleteAccount = async () => {
-    if (
-      window.confirm(
-        "Are you sure you want to delete your account? This action cannot be undone."
-      )
-    ) {
-      dispatch(deleteUserStart());
+    if (window.confirm("Are you sure you want to delete your account?")) {
       try {
+        dispatch(deleteUserStart());
         const response = await fetch(`/api/user/delete/${user._id}`, {
           method: "DELETE",
           credentials: "include",
         });
-
         const data = await response.json();
+        
         if (data.success) {
           dispatch(deleteUserSuccess());
           setMessage("Account deleted successfully");
@@ -174,11 +177,7 @@ const Profile = () => {
   const handleMyListings = async () => {
     try {
       setLoadingListings(true);
-      setMylistingserror(false);
       setMessage("");
-
-      console.log("Fetching listings for user:", user._id);
-
       const response = await fetch(`/api/listing/user/${user._id}`, {
         method: "GET",
         headers: {
@@ -187,34 +186,19 @@ const Profile = () => {
         credentials: "include",
       });
 
-      console.log("Response status:", response.status);
-      console.log("Response ok:", response.ok);
-
       if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+        throw new Error("Failed to fetch listings");
       }
 
       const data = await response.json();
-      console.log("Response data:", data);
-
-      if (data.success === false) {
-        setMylistingserror(true);
-        setMessage(data.message || "Failed to fetch listings");
-        return;
-      }
-
-      const listings = Array.isArray(data)
-        ? data
-        : data.listings || data.data || [];
+      const listings = Array.isArray(data) ? data : data.listings || data.data || [];
       setUserslistings(listings);
       setShowListings(true);
-
+      
       if (listings.length === 0) {
         setMessage("No listings found");
       }
     } catch (error) {
-      console.error("Error fetching listings:", error);
-      setMylistingserror(true);
       setMessage(`Error fetching listings: ${error.message}`);
     } finally {
       setLoadingListings(false);
@@ -228,13 +212,10 @@ const Profile = () => {
           method: "DELETE",
           credentials: "include",
         });
-
         const data = await response.json();
-
-        if (data.success !== false) {
-          setUserslistings(
-            userslistings.filter((listing) => listing._id !== listingId)
-          );
+        
+        if (data.success) {
+          setUserslistings(userslistings.filter((listing) => listing._id !== listingId));
           setMessage("Listing deleted successfully!");
         } else {
           setMessage(data.message || "Failed to delete listing");
@@ -257,7 +238,6 @@ const Profile = () => {
     }
   };
 
-  // Helper function to format price
   const formatPrice = (listing) => {
     const price = listing.regularPrice || listing.discountedprice || 0;
     return new Intl.NumberFormat("en-US", {
@@ -274,15 +254,12 @@ const Profile = () => {
         {/* Background decoration */}
         <div className="absolute top-0 right-0 w-40 h-40 bg-gradient-to-br from-blue-200/30 to-purple-200/30 rounded-full blur-3xl"></div>
         <div className="absolute bottom-0 left-0 w-32 h-32 bg-gradient-to-tr from-green-200/30 to-blue-200/30 rounded-full blur-2xl"></div>
-
+        
         {!showListings ? (
           // Profile Form
-          <form
-            onSubmit={handleSubmit}
-            className="mt-8 space-y-6 relative z-10"
-          >
+          <form onSubmit={handleSubmit} className="mt-8 space-y-6 relative z-10">
             <div className="flex flex-col items-center">
-              <div
+              <div 
                 className="relative w-32 h-32 rounded-full overflow-hidden shadow-lg hover:scale-105 transition-transform cursor-pointer group ring-4 ring-white"
                 onClick={handleImageClick}
               >
@@ -311,13 +288,11 @@ const Profile = () => {
             </div>
 
             {message && (
-              <div
-                className={`p-4 rounded-xl text-center shadow-md ${
-                  message.includes("successfully")
-                    ? "bg-gradient-to-r from-green-50 to-emerald-50 text-green-700 border border-green-200"
-                    : "bg-gradient-to-r from-red-50 to-rose-50 text-red-700 border border-red-200"
-                }`}
-              >
+              <div className={`p-4 rounded-xl text-center shadow-md ${
+                message.includes("successfully")
+                  ? "bg-gradient-to-r from-green-50 to-emerald-50 text-green-700 border border-green-200"
+                  : "bg-gradient-to-r from-red-50 to-rose-50 text-red-700 border border-red-200"
+              }`}>
                 {message}
               </div>
             )}
@@ -404,15 +379,9 @@ const Profile = () => {
                 Sign Out
               </span>
             </div>
-
-            {mylistingserror && (
-              <p className="text-red-500 text-center text-sm mt-2">
-                Error showing listings
-              </p>
-            )}
           </form>
         ) : (
-          // Listings View - List Format Only
+          // Listings View
           <div className="mt-8 relative z-10">
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 space-y-4 md:space-y-0">
               <div>
@@ -425,23 +394,20 @@ const Profile = () => {
                   listed
                 </p>
               </div>
-
               <button
                 onClick={() => setShowListings(false)}
-                className="bg-gradient-to-r from-gray-500 to-gray-600 text-white px-6 py-3 rounded-xl hover:from-gray-600 hover:to-gray-700 transition-all transform hover:scale-105 shadow-lg font-medium"
+                className="bg-gradient-to-r from-gray-500 to-gray-600 text-white px-6 py-3 rounded-xl hover:from-gray-600 hover:to-gray-700 transition-all shadow-lg font-medium"
               >
                 Back to Profile
               </button>
             </div>
 
             {message && (
-              <div
-                className={`p-4 rounded-xl text-center mb-6 shadow-md ${
-                  message.includes("successfully")
-                    ? "bg-gradient-to-r from-green-50 to-emerald-50 text-green-700 border border-green-200"
-                    : "bg-gradient-to-r from-red-50 to-rose-50 text-red-700 border border-red-200"
-                }`}
-              >
+              <div className={`p-4 rounded-xl text-center mb-6 shadow-md ${
+                message.includes("successfully")
+                  ? "bg-gradient-to-r from-green-50 to-emerald-50 text-green-700 border border-green-200"
+                  : "bg-gradient-to-r from-red-50 to-rose-50 text-red-700 border border-red-200"
+              }`}>
                 {message}
               </div>
             )}
@@ -459,7 +425,7 @@ const Profile = () => {
                       strokeLinecap="round"
                       strokeLinejoin="round"
                       strokeWidth={2}
-                      d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"
+                      d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5m-9 0H3m2 0h5m-9 0H3m2 0h5m-9 0H3m2 0h5m-9 0H3m2 0h5"
                     />
                   </svg>
                 </div>
@@ -476,7 +442,6 @@ const Profile = () => {
                 </Link>
               </div>
             ) : (
-              // List View Only
               <div className="space-y-4">
                 {userslistings.map((listing) => (
                   <div
@@ -509,19 +474,16 @@ const Profile = () => {
                             </svg>
                           </div>
                         )}
-
                         {/* Type Badge */}
                         <div className="absolute top-4 left-4 bg-black/70 text-white px-3 py-1 rounded-full text-xs font-semibold capitalize">
                           {listing.type}
                         </div>
-
                         {listing.offer && (
                           <div className="absolute top-4 right-4 bg-red-100 text-red-600 px-3 py-1 rounded-lg text-sm font-semibold">
                             Special Offer
                           </div>
                         )}
                       </div>
-
                       {/* Content */}
                       <div className="flex-1 p-6">
                         <div className="flex flex-col h-full">
@@ -530,7 +492,6 @@ const Profile = () => {
                               {listing.name}
                             </h3>
                           </div>
-
                           <p className="text-gray-600 mb-3 flex items-center">
                             <svg
                               className="w-4 h-4 mr-2 text-gray-400"
@@ -553,7 +514,6 @@ const Profile = () => {
                             </svg>
                             {listing.address}
                           </p>
-
                           <div className="text-3xl font-bold text-blue-600 mb-4">
                             {formatPrice(listing)}
                             {listing.type === "rent" && (
@@ -562,14 +522,6 @@ const Profile = () => {
                               </span>
                             )}
                           </div>
-
-                          {/* Description */}
-                          {listing.description && (
-                            <p className="text-gray-600 mb-4 line-clamp-3">
-                              {listing.description}
-                            </p>
-                          )}
-
                           {/* Property Features */}
                           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6 text-sm">
                             <div className="flex items-center text-gray-600">
@@ -583,7 +535,7 @@ const Profile = () => {
                                   strokeLinecap="round"
                                   strokeLinejoin="round"
                                   strokeWidth={2}
-                                  d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2H5a2 2 0 00-2-2z"
+                                  d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2H5a2 2 0 00-2 2v10"
                                 />
                                 <path
                                   strokeLinecap="round"
@@ -657,43 +609,10 @@ const Profile = () => {
                               </div>
                             )}
                           </div>
-
-                          {/* Additional Details */}
-                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6 text-sm">
-                            {listing.regularPrice &&
-                              listing.discountedprice &&
-                              listing.regularPrice !==
-                                listing.discountedprice && (
-                                <div className="flex items-center">
-                                  <span className="text-gray-500">
-                                    Regular Price:
-                                  </span>
-                                  <span className="ml-2 line-through text-gray-400">
-                                    {formatPrice({
-                                      regularPrice: listing.regularPrice,
-                                    })}
-                                  </span>
-                                </div>
-                              )}
-                            {listing.createdAt && (
-                              <div className="flex items-center">
-                                <span className="text-gray-500">Listed:</span>
-                                <span className="ml-2 font-medium">
-                                  {new Date(
-                                    listing.createdAt
-                                  ).toLocaleDateString()}
-                                </span>
-                              </div>
-                            )}
-                          </div>
-
                           {/* Action Buttons */}
                           <div className="flex space-x-3 mt-auto">
-                            <Link
-                              to={`/create-listing/${listing._id}`}
-                              className="flex-1"
-                            >
-                              <button className="w-full bg-green-500 text-white py-3 px-4 rounded-xl hover:bg-green-600 transition-colors font-medium shadow-md hover:shadow-lg transform hover:scale-[1.02]">
+                            <Link to={`/create-listing/${listing._id}`}>
+                              <button className="flex-1 bg-green-500 text-white py-3 px-4 rounded-xl hover:bg-green-600 transition-colors font-medium shadow-md hover:shadow-lg transform hover:scale-[1.02]">
                                 Edit Listing
                               </button>
                             </Link>
