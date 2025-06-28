@@ -31,7 +31,6 @@ const Profile = () => {
   const [userslistings, setUserslistings] = useState([]);
   const [showListings, setShowListings] = useState(false);
   const [loadingListings, setLoadingListings] = useState(false);
-  const [viewMode, setViewMode] = useState("grid"); // New state for view mode
   const fileInputRef = useRef(null);
 
   const handleInputChange = (e) => {
@@ -269,17 +268,6 @@ const Profile = () => {
     }).format(price);
   };
 
-  // Helper function to get listing status
-  const getListingStatus = (listing) => {
-    const createdAt = new Date(listing.createdAt);
-    const now = new Date();
-    const daysDiff = Math.floor((now - createdAt) / (1000 * 60 * 60 * 24));
-
-    if (daysDiff < 7) return { text: "New", color: "bg-green-500" };
-    if (daysDiff < 30) return { text: "Active", color: "bg-blue-500" };
-    return { text: "Older", color: "bg-gray-500" };
-  };
-
   return (
     <div className="max-w-7xl mx-auto p-6">
       <div className="bg-gradient-to-br from-slate-50 to-slate-100 rounded-3xl shadow-2xl p-8 relative overflow-hidden">
@@ -288,7 +276,7 @@ const Profile = () => {
         <div className="absolute bottom-0 left-0 w-32 h-32 bg-gradient-to-tr from-green-200/30 to-blue-200/30 rounded-full blur-2xl"></div>
 
         {!showListings ? (
-          // Profile Form (keeping existing form code)
+          // Profile Form
           <form
             onSubmit={handleSubmit}
             className="mt-8 space-y-6 relative z-10"
@@ -424,7 +412,7 @@ const Profile = () => {
             )}
           </form>
         ) : (
-          // Enhanced Listings View
+          // Listings View - List Format Only
           <div className="mt-8 relative z-10">
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 space-y-4 md:space-y-0">
               <div>
@@ -438,38 +426,12 @@ const Profile = () => {
                 </p>
               </div>
 
-              <div className="flex items-center space-x-4">
-                {/* View mode toggle */}
-                <div className="flex bg-white rounded-xl p-1 shadow-md">
-                  <button
-                    onClick={() => setViewMode("grid")}
-                    className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
-                      viewMode === "grid"
-                        ? "bg-blue-500 text-white shadow-md"
-                        : "text-gray-600 hover:text-gray-800"
-                    }`}
-                  >
-                    Grid
-                  </button>
-                  <button
-                    onClick={() => setViewMode("list")}
-                    className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
-                      viewMode === "list"
-                        ? "bg-blue-500 text-white shadow-md"
-                        : "text-gray-600 hover:text-gray-800"
-                    }`}
-                  >
-                    List
-                  </button>
-                </div>
-
-                <button
-                  onClick={() => setShowListings(false)}
-                  className="bg-gradient-to-r from-gray-500 to-gray-600 text-white px-6 py-3 rounded-xl hover:from-gray-600 hover:to-gray-700 transition-all transform hover:scale-105 shadow-lg font-medium"
-                >
-                  Back to Profile
-                </button>
-              </div>
+              <button
+                onClick={() => setShowListings(false)}
+                className="bg-gradient-to-r from-gray-500 to-gray-600 text-white px-6 py-3 rounded-xl hover:from-gray-600 hover:to-gray-700 transition-all transform hover:scale-105 shadow-lg font-medium"
+              >
+                Back to Profile
+              </button>
             </div>
 
             {message && (
@@ -514,75 +476,64 @@ const Profile = () => {
                 </Link>
               </div>
             ) : (
-              <div
-                className={
-                  viewMode === "grid"
-                    ? "grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6"
-                    : "space-y-4"
-                }
-              >
-                {userslistings.map((listing) => {
-                  const status = getListingStatus(listing);
-
-                  if (viewMode === "grid") {
-                    return (
-                      <div
-                        key={listing._id}
-                        className="bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-xl transition-all duration-300 transform hover:scale-[1.02] group"
-                      >
-                        {/* Image Container */}
-                        <div className="relative h-56 overflow-hidden">
-                          {listing.imageUrls && listing.imageUrls[0] ? (
-                            <img
-                              src={listing.imageUrls[0]}
-                              alt={listing.name}
-                              className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-                            />
-                          ) : (
-                            <div className="w-full h-full bg-gradient-to-br from-gray-200 to-gray-300 flex items-center justify-center">
-                              <svg
-                                className="w-16 h-16 text-gray-400"
-                                fill="none"
-                                stroke="currentColor"
-                                viewBox="0 0 24 24"
-                              >
-                                <path
-                                  strokeLinecap="round"
-                                  strokeLinejoin="round"
-                                  strokeWidth={2}
-                                  d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
-                                />
-                              </svg>
-                            </div>
-                          )}
-
-                          {/* Status Badge */}
-                          <div
-                            className={`absolute top-4 left-4 ${status.color} text-white px-3 py-1 rounded-full text-xs font-semibold shadow-lg`}
-                          >
-                            {status.text}
+              // List View Only
+              <div className="space-y-4">
+                {userslistings.map((listing) => (
+                  <div
+                    key={listing._id}
+                    className="bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-xl transition-all duration-300 group"
+                  >
+                    <div className="flex flex-col md:flex-row">
+                      {/* Image */}
+                      <div className="relative md:w-80 h-64 md:h-auto overflow-hidden">
+                        {listing.imageUrls && listing.imageUrls[0] ? (
+                          <img
+                            src={listing.imageUrls[0]}
+                            alt={listing.name}
+                            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                          />
+                        ) : (
+                          <div className="w-full h-full bg-gradient-to-br from-gray-200 to-gray-300 flex items-center justify-center">
+                            <svg
+                              className="w-16 h-16 text-gray-400"
+                              fill="none"
+                              stroke="currentColor"
+                              viewBox="0 0 24 24"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
+                              />
+                            </svg>
                           </div>
+                        )}
 
-                          {/* Type Badge */}
-                          <div className="absolute top-4 right-4 bg-black/70 text-white px-3 py-1 rounded-full text-xs font-semibold capitalize">
-                            {listing.type}
-                          </div>
-
-                          {/* Overlay gradient */}
-                          <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                        {/* Type Badge */}
+                        <div className="absolute top-4 left-4 bg-black/70 text-white px-3 py-1 rounded-full text-xs font-semibold capitalize">
+                          {listing.type}
                         </div>
 
-                        {/* Content */}
-                        <div className="p-6">
+                        {listing.offer && (
+                          <div className="absolute top-4 right-4 bg-red-100 text-red-600 px-3 py-1 rounded-lg text-sm font-semibold">
+                            Special Offer
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Content */}
+                      <div className="flex-1 p-6">
+                        <div className="flex flex-col h-full">
                           <div className="flex justify-between items-start mb-3">
-                            <h3 className="text-xl font-bold text-gray-800 line-clamp-2 group-hover:text-blue-600 transition-colors">
+                            <h3 className="text-2xl font-bold text-gray-800 group-hover:text-blue-600 transition-colors">
                               {listing.name}
                             </h3>
                           </div>
 
-                          <p className="text-gray-600 text-sm mb-3 flex items-center">
+                          <p className="text-gray-600 mb-3 flex items-center">
                             <svg
-                              className="w-4 h-4 mr-1 text-gray-400"
+                              className="w-4 h-4 mr-2 text-gray-400"
                               fill="none"
                               stroke="currentColor"
                               viewBox="0 0 24 24"
@@ -603,27 +554,27 @@ const Profile = () => {
                             {listing.address}
                           </p>
 
-                          <div className="flex items-center justify-between mb-4">
-                            <div className="text-2xl font-bold text-blue-600">
-                              {formatPrice(listing)}
-                              {listing.type === "rent" && (
-                                <span className="text-sm text-gray-500 font-normal">
-                                  /month
-                                </span>
-                              )}
-                            </div>
-                            {listing.offer && (
-                              <span className="bg-red-100 text-red-600 px-2 py-1 rounded-lg text-xs font-semibold">
-                                Special Offer
+                          <div className="text-3xl font-bold text-blue-600 mb-4">
+                            {formatPrice(listing)}
+                            {listing.type === "rent" && (
+                              <span className="text-lg text-gray-500 font-normal">
+                                /month
                               </span>
                             )}
                           </div>
 
+                          {/* Description */}
+                          {listing.description && (
+                            <p className="text-gray-600 mb-4 line-clamp-3">
+                              {listing.description}
+                            </p>
+                          )}
+
                           {/* Property Features */}
-                          <div className="grid grid-cols-2 gap-3 mb-4 text-sm">
+                          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6 text-sm">
                             <div className="flex items-center text-gray-600">
                               <svg
-                                className="w-4 h-4 mr-2 text-gray-400"
+                                className="w-5 h-5 mr-2 text-gray-400"
                                 fill="none"
                                 stroke="currentColor"
                                 viewBox="0 0 24 24"
@@ -641,12 +592,16 @@ const Profile = () => {
                                   d="M8 21v-4a2 2 0 012-2h4a2 2 0 012 2v4"
                                 />
                               </svg>
-                              {listing.bedrooms} Bed
-                              {listing.bedrooms !== 1 ? "s" : ""}
+                              <span className="font-medium">
+                                {listing.bedrooms}
+                              </span>
+                              <span className="ml-1">
+                                Bed{listing.bedrooms !== 1 ? "s" : ""}
+                              </span>
                             </div>
                             <div className="flex items-center text-gray-600">
                               <svg
-                                className="w-4 h-4 mr-2 text-gray-400"
+                                className="w-5 h-5 mr-2 text-gray-400"
                                 fill="none"
                                 stroke="currentColor"
                                 viewBox="0 0 24 24"
@@ -658,13 +613,17 @@ const Profile = () => {
                                   d="M8 14v3m4-3v3m4-3v3M3 21h18M3 10h18M10.5 3L12 2l1.5 1M21 3l-9 9-9-9"
                                 />
                               </svg>
-                              {listing.bathrooms} Bath
-                              {listing.bathrooms !== 1 ? "s" : ""}
+                              <span className="font-medium">
+                                {listing.bathrooms}
+                              </span>
+                              <span className="ml-1">
+                                Bath{listing.bathrooms !== 1 ? "s" : ""}
+                              </span>
                             </div>
                             {listing.parking && (
                               <div className="flex items-center text-gray-600">
                                 <svg
-                                  className="w-4 h-4 mr-2 text-gray-400"
+                                  className="w-5 h-5 mr-2 text-green-500"
                                   fill="none"
                                   stroke="currentColor"
                                   viewBox="0 0 24 24"
@@ -673,16 +632,16 @@ const Profile = () => {
                                     strokeLinecap="round"
                                     strokeLinejoin="round"
                                     strokeWidth={2}
-                                    d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"
+                                    d="M5 13l4 4L19 7"
                                   />
                                 </svg>
-                                Parking
+                                <span>Parking</span>
                               </div>
                             )}
                             {listing.furnished && (
                               <div className="flex items-center text-gray-600">
                                 <svg
-                                  className="w-4 h-4 mr-2 text-gray-400"
+                                  className="w-5 h-5 mr-2 text-green-500"
                                   fill="none"
                                   stroke="currentColor"
                                   viewBox="0 0 24 24"
@@ -691,302 +650,65 @@ const Profile = () => {
                                     strokeLinecap="round"
                                     strokeLinejoin="round"
                                     strokeWidth={2}
-                                    d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"
+                                    d="M5 13l4 4L19 7"
                                   />
                                 </svg>
-                                Furnished
+                                <span>Furnished</span>
                               </div>
                             )}
                           </div>
 
-                          {/* Description Preview */}
-                          {listing.description && (
-                            <p className="text-gray-600 text-sm mb-4 line-clamp-2">
-                              {listing.description}
-                            </p>
-                          )}
+                          {/* Additional Details */}
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6 text-sm">
+                            {listing.regularPrice &&
+                              listing.discountedprice &&
+                              listing.regularPrice !==
+                                listing.discountedprice && (
+                                <div className="flex items-center">
+                                  <span className="text-gray-500">
+                                    Regular Price:
+                                  </span>
+                                  <span className="ml-2 line-through text-gray-400">
+                                    {formatPrice({
+                                      regularPrice: listing.regularPrice,
+                                    })}
+                                  </span>
+                                </div>
+                              )}
+                            {listing.createdAt && (
+                              <div className="flex items-center">
+                                <span className="text-gray-500">Listed:</span>
+                                <span className="ml-2 font-medium">
+                                  {new Date(
+                                    listing.createdAt
+                                  ).toLocaleDateString()}
+                                </span>
+                              </div>
+                            )}
+                          </div>
 
                           {/* Action Buttons */}
-                          <div className="flex space-x-2">
-                            <Link
-                              to={`/listing/${listing._id}`}
-                              className="flex-1"
-                            >
-                              <button className="w-full bg-blue-500 text-white py-2 px-3 rounded-lg text-sm hover:bg-blue-600 transition-colors font-medium">
-                                View
-                              </button>
-                            </Link>
+                          <div className="flex space-x-3 mt-auto">
                             <Link
                               to={`/create-listing/${listing._id}`}
                               className="flex-1"
                             >
-                              <button className="w-full bg-green-500 text-white py-2 px-3 rounded-lg text-sm hover:bg-green-600 transition-colors font-medium">
-                                Edit
+                              <button className="w-full bg-green-500 text-white py-3 px-4 rounded-xl hover:bg-green-600 transition-colors font-medium shadow-md hover:shadow-lg transform hover:scale-[1.02]">
+                                Edit Listing
                               </button>
                             </Link>
                             <button
                               onClick={() => handleDeleteListing(listing._id)}
-                              className="bg-red-500 text-white py-2 px-3 rounded-lg text-sm hover:bg-red-600 transition-colors font-medium"
+                              className="bg-red-500 text-white py-3 px-4 rounded-xl hover:bg-red-600 transition-colors font-medium shadow-md hover:shadow-lg transform hover:scale-[1.02]"
                             >
                               Delete
                             </button>
                           </div>
                         </div>
                       </div>
-                    );
-                  } else {
-                    // List View
-                    return (
-                      <div
-                        key={listing._id}
-                        className="bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-xl transition-all duration-300 group"
-                      >
-                        <div className="flex flex-col md:flex-row">
-                          {/* Image */}
-                          <div className="relative md:w-80 h-64 md:h-auto overflow-hidden">
-                            {listing.imageUrls && listing.imageUrls[0] ? (
-                              <img
-                                src={listing.imageUrls[0]}
-                                alt={listing.name}
-                                className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-                              />
-                            ) : (
-                              <div className="w-full h-full bg-gradient-to-br from-gray-200 to-gray-300 flex items-center justify-center">
-                                <svg
-                                  className="w-16 h-16 text-gray-400"
-                                  fill="none"
-                                  stroke="currentColor"
-                                  viewBox="0 0 24 24"
-                                >
-                                  <path
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                    strokeWidth={2}
-                                    d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
-                                  />
-                                </svg>
-                              </div>
-                            )}
-
-                            {/* Status Badge */}
-                            <div
-                              className={`absolute top-4 left-4 ${status.color} text-white px-3 py-1 rounded-full text-xs font-semibold shadow-lg`}
-                            >
-                              {status.text}
-                            </div>
-
-                            {/* Type Badge */}
-                            <div className="absolute top-4 right-4 bg-black/70 text-white px-3 py-1 rounded-full text-xs font-semibold capitalize">
-                              {listing.type}
-                            </div>
-                          </div>
-
-                          {/* Content */}
-                          <div className="flex-1 p-6">
-                            <div className="flex flex-col h-full">
-                              <div className="flex justify-between items-start mb-3">
-                                <h3 className="text-2xl font-bold text-gray-800 group-hover:text-blue-600 transition-colors">
-                                  {listing.name}
-                                </h3>
-                                {listing.offer && (
-                                  <span className="bg-red-100 text-red-600 px-3 py-1 rounded-lg text-sm font-semibold">
-                                    Special Offer
-                                  </span>
-                                )}
-                              </div>
-
-                              <p className="text-gray-600 mb-3 flex items-center">
-                                <svg
-                                  className="w-4 h-4 mr-2 text-gray-400"
-                                  fill="none"
-                                  stroke="currentColor"
-                                  viewBox="0 0 24 24"
-                                >
-                                  <path
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                    strokeWidth={2}
-                                    d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
-                                  />
-                                  <path
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                    strokeWidth={2}
-                                    d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
-                                  />
-                                </svg>
-                                {listing.address}
-                              </p>
-
-                              <div className="text-3xl font-bold text-blue-600 mb-4">
-                                {formatPrice(listing)}
-                                {listing.type === "rent" && (
-                                  <span className="text-lg text-gray-500 font-normal">
-                                    /month
-                                  </span>
-                                )}
-                              </div>
-
-                              {/* Description */}
-                              {listing.description && (
-                                <p className="text-gray-600 mb-4 line-clamp-3">
-                                  {listing.description}
-                                </p>
-                              )}
-
-                              {/* Property Features */}
-                              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6 text-sm">
-                                <div className="flex items-center text-gray-600">
-                                  <svg
-                                    className="w-5 h-5 mr-2 text-gray-400"
-                                    fill="none"
-                                    stroke="currentColor"
-                                    viewBox="0 0 24 24"
-                                  >
-                                    <path
-                                      strokeLinecap="round"
-                                      strokeLinejoin="round"
-                                      strokeWidth={2}
-                                      d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2H5a2 2 0 00-2-2z"
-                                    />
-                                    <path
-                                      strokeLinecap="round"
-                                      strokeLinejoin="round"
-                                      strokeWidth={2}
-                                      d="M8 21v-4a2 2 0 012-2h4a2 2 0 012 2v4"
-                                    />
-                                  </svg>
-                                  <span className="font-medium">
-                                    {listing.bedrooms}
-                                  </span>
-                                  <span className="ml-1">
-                                    Bed{listing.bedrooms !== 1 ? "s" : ""}
-                                  </span>
-                                </div>
-                                <div className="flex items-center text-gray-600">
-                                  <svg
-                                    className="w-5 h-5 mr-2 text-gray-400"
-                                    fill="none"
-                                    stroke="currentColor"
-                                    viewBox="0 0 24 24"
-                                  >
-                                    <path
-                                      strokeLinecap="round"
-                                      strokeLinejoin="round"
-                                      strokeWidth={2}
-                                      d="M8 14v3m4-3v3m4-3v3M3 21h18M3 10h18M10.5 3L12 2l1.5 1M21 3l-9 9-9-9"
-                                    />
-                                  </svg>
-                                  <span className="font-medium">
-                                    {listing.bathrooms}
-                                  </span>
-                                  <span className="ml-1">
-                                    Bath{listing.bathrooms !== 1 ? "s" : ""}
-                                  </span>
-                                </div>
-                                {listing.parking && (
-                                  <div className="flex items-center text-gray-600">
-                                    <svg
-                                      className="w-5 h-5 mr-2 text-green-500"
-                                      fill="none"
-                                      stroke="currentColor"
-                                      viewBox="0 0 24 24"
-                                    >
-                                      <path
-                                        strokeLinecap="round"
-                                        strokeLinejoin="round"
-                                        strokeWidth={2}
-                                        d="M5 13l4 4L19 7"
-                                      />
-                                    </svg>
-                                    <span>Parking</span>
-                                  </div>
-                                )}
-                                {listing.furnished && (
-                                  <div className="flex items-center text-gray-600">
-                                    <svg
-                                      className="w-5 h-5 mr-2 text-green-500"
-                                      fill="none"
-                                      stroke="currentColor"
-                                      viewBox="0 0 24 24"
-                                    >
-                                      <path
-                                        strokeLinecap="round"
-                                        strokeLinejoin="round"
-                                        strokeWidth={2}
-                                        d="M5 13l4 4L19 7"
-                                      />
-                                    </svg>
-                                    <span>Furnished</span>
-                                  </div>
-                                )}
-                              </div>
-
-                              {/* Additional Details */}
-                              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6 text-sm">
-                                {listing.regularPrice &&
-                                  listing.discountedprice &&
-                                  listing.regularPrice !==
-                                    listing.discountedprice && (
-                                    <div className="flex items-center">
-                                      <span className="text-gray-500">
-                                        Regular Price:
-                                      </span>
-                                      <span className="ml-2 line-through text-gray-400">
-                                        {formatPrice({
-                                          regularPrice: listing.regularPrice,
-                                        })}
-                                      </span>
-                                    </div>
-                                  )}
-                                {listing.createdAt && (
-                                  <div className="flex items-center">
-                                    <span className="text-gray-500">
-                                      Listed:
-                                    </span>
-                                    <span className="ml-2 font-medium">
-                                      {new Date(
-                                        listing.createdAt
-                                      ).toLocaleDateString()}
-                                    </span>
-                                  </div>
-                                )}
-                              </div>
-
-                              {/* Action Buttons */}
-                              <div className="flex space-x-3 mt-auto">
-                                <Link
-                                  to={`/listing/${listing._id}`}
-                                  className="flex-1"
-                                >
-                                  <button className="w-full bg-blue-500 text-white py-3 px-4 rounded-xl hover:bg-blue-600 transition-colors font-medium shadow-md hover:shadow-lg transform hover:scale-[1.02]">
-                                    View Details
-                                  </button>
-                                </Link>
-                                <Link
-                                  to={`/create-listing/${listing._id}`}
-                                  className="flex-1"
-                                >
-                                  <button className="w-full bg-green-500 text-white py-3 px-4 rounded-xl hover:bg-green-600 transition-colors font-medium shadow-md hover:shadow-lg transform hover:scale-[1.02]">
-                                    Edit Listing
-                                  </button>
-                                </Link>
-                                <button
-                                  onClick={() =>
-                                    handleDeleteListing(listing._id)
-                                  }
-                                  className="bg-red-500 text-white py-3 px-4 rounded-xl hover:bg-red-600 transition-colors font-medium shadow-md hover:shadow-lg transform hover:scale-[1.02]"
-                                >
-                                  Delete
-                                </button>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    );
-                  }
-                })}
+                    </div>
+                  </div>
+                ))}
               </div>
             )}
           </div>
