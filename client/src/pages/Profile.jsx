@@ -19,14 +19,14 @@ const Profile = () => {
     username: user?.username || "",
     email: user?.email || "",
     password: "",
-    profileImage: user?.image || "",
-
+    profilePicture: user?.profilePicture || "", // Fixed: changed from profileImage to profilePicture
   });
 
   console.log(formData);
-  const [profileImage, setProfileImage] = useState(user?.image);
+  const [profileImage, setProfileImage] = useState(user?.profilePicture); // Fixed: changed from image to profilePicture
   const [imageFile, setImageFile] = useState(null);
   const [message, setMessage] = useState("");
+  const [uploadingImage, setUploadingImage] = useState(false); // Added loading state for image upload
   const fileInputRef = useRef(null);
 
   const handleInputChange = (e) => {
@@ -54,26 +54,29 @@ const Profile = () => {
   };
 
   const uploadImageToCloudinary = async (file) => {
-    const formData = new FormData();
-    formData.append("file", file);
-    formData.append(
+    const formDataImg = new FormData(); // Renamed to avoid conflict
+    formDataImg.append("file", file);
+    formDataImg.append(
       "upload_preset",
       process.env.REACT_APP_CLOUDINARY_UPLOAD_PRESET || "unsigned_preset"
     );
-    formData.append("folder", "profile_images");
+    formDataImg.append("folder", "profile_images");
 
     try {
       const response = await fetch(
         `https://api.cloudinary.com/v1_1/${process.env.REACT_APP_CLOUDINARY_CLOUD_NAME}/image/upload`,
         {
           method: "POST",
-          body: formData,
+          body: formDataImg,
         }
       );
       const data = await response.json();
+      if (data.error) {
+        throw new Error(data.error.message);
+      }
       return data.secure_url;
     } catch (error) {
-      throw new Error("Failed to upload image");
+      throw new Error("Failed to upload image: " + error.message);
     }
   };
 
@@ -81,26 +84,64 @@ const Profile = () => {
     e.preventDefault();
     try {
       dispatch(updateUserStart());
+
+      let updatedFormData = { ...formData };
+
+      // Upload image to Cloudinary if a new image was selected
+      if (imageFile) {
+        try {
+          setUploadingImage(true);
+          const imageUrl = await uploadImageToCloudinary(imageFile);
+          updatedFormData.profilePicture = imageUrl;
+          setMessage("Image uploaded successfully!");
+        } catch (error) {
+          setUploadingImage(false);
+          dispatch(
+            updateUserFailure("Failed to upload image: " + error.message)
+          );
+          return;
+        } finally {
+          setUploadingImage(false);
+        }
+      }
+
+      // Remove password from request if it's empty
+      if (!updatedFormData.password) {
+        delete updatedFormData.password;
+      }
+
       const res = await fetch(`/api/user/update/${user._id}`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(formData),
+        credentials: "include", // Added credentials
+        body: JSON.stringify(updatedFormData),
       });
+
       const data = await res.json();
-      if (data.success == false) {
-        dispatch(updateUserFailure(data.message));
+
+      if (data.success === false || !res.ok) {
+        dispatch(updateUserFailure(data.message || "Update failed"));
         return;
       }
+
       dispatch(updateUserSuccess(data));
+      setMessage("Profile updated successfully!");
+      setImageFile(null); // Clear the selected file
 
+      // Update the form data with the response
+      setFormData({
+        username: data.username || "",
+        email: data.email || "",
+        password: "",
+        profilePicture: data.profilePicture || "",
+      });
     } catch (error) {
-      //console.error("Error updating profile:", error);
+      console.error("Error updating profile:", error);
       dispatch(updateUserFailure(error.message));
-
     }
-  }
+  };
 
   const handleDeleteAccount = async () => {
     if (
@@ -246,7 +287,6 @@ const Profile = () => {
               Create New Listing
             </button>
           </Link>
-          
         </form>
 
         <div className="flex justify-between mt-6 text-sm">
