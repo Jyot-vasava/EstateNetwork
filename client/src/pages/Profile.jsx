@@ -9,7 +9,7 @@ import {
   deleteUserFailure,
   signOut,
 } from "../redux/user/userSlice";
-import { Link } from "react-router-dom";
+import { Link, Navigate } from "react-router-dom";
 
 const Profile = () => {
   const { user, loading, error } = useSelector((state) => state.user);
@@ -233,16 +233,19 @@ const Profile = () => {
         credentials: "include",
       });
       dispatch(signOut());
+      
+      window.location.replace("/signin");
     } catch (error) {
       console.log("Error signing out:", error);
+      
     }
   };
 
   const formatPrice = (listing) => {
-    const price = listing.regularPrice || listing.discountedprice || 0;
+    const price = listing.regularprice || listing.discountedprice || 0;
     return new Intl.NumberFormat("en-US", {
       style: "currency",
-      currency: "USD",
+      currency: "INR",
       minimumFractionDigits: 0,
       maximumFractionDigits: 0,
     }).format(price);

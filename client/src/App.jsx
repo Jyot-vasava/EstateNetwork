@@ -8,6 +8,9 @@ import CreateListing from "./pages/createlisting";
 import Header from "./components/Header";
 
 
+
+
+
 function App() {
   return (
     <BrowserRouter>
@@ -17,15 +20,8 @@ function App() {
         <Route path="/about" element={<About />} />
         <Route path="/signup" element={<SignUp />} />
         <Route path="/signin" element={<SignIn />} />
-
-        {/* Protected Routes */}
-       
-          <Route path="/profile" element={<Profile />} />
-          <Route path="/create-listing" element={<CreateListing />} />
-          <Route path="/create-listing/:id" element={<CreateListing />} />
-       
-
-        {/* 404 Route - Must be last */}
+        <Route path="/profile" element={<Profile />} />
+        <Route path="/create-listing" element={<CreateListing />} />      
         <Route path="*" element={<div>404 Not Found</div>} />
       </Routes>
     </BrowserRouter>
@@ -33,3 +29,5 @@ function App() {
 }
 
 export default App;
+
+

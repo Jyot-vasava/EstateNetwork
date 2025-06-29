@@ -23,8 +23,8 @@ const Header = () => {
           <FaSearch className="text-slate-600 mr-3" />
         </form>
         <ul className="flex gap-3">
-          <Link to="/profile">
-            {user ? (
+          {user ? (
+            <Link to="/profile">
               <img
                 src={
                   user.profilePicture ||
@@ -33,12 +33,14 @@ const Header = () => {
                 alt="profile-image"
                 className="w-8 h-8 rounded-full object-cover border-2 border-gray-300 hover:border-blue-500 transition-colors"
               />
-            ) : (
+            </Link>
+          ) : (
+            <Link to="/signin">
               <li className="text-slate-700 hover:underline cursor-pointer">
                 Sign In
               </li>
-            )}
-          </Link>
+            </Link>
+          )}
 
           <Link to="/">
             <li className="hidden sm:inline text-slate-700 hover:underline cursor-pointer">
