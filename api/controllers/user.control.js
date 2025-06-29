@@ -1,7 +1,7 @@
 import User from "../models/user.model.js";
 import bcryptjs from "bcryptjs";
 import { errorHandler } from "../utils/error.js";
-import Listing from "../models/listing.model.js";
+
 
 
 export const getUser = (req, res) => {
@@ -83,3 +83,5 @@ export const getUserListing = async (req, res, next) => {
     return next(errorHandler(401, "You can only get your own profile"));
   }
 };
+
+

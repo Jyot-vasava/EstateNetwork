@@ -183,6 +183,7 @@ const CreateListing = () => {
         setError(data.message);
       } else {
         navigate(`/listings/${data._id}`);
+       // navigate("/profile");
       }
     } catch (err) {
       setLoading(false);

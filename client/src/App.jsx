@@ -6,7 +6,7 @@ import SignIn from "./pages/SignIn";
 import Profile from "./pages/Profile";
 import CreateListing from "./pages/createlisting";
 import Header from "./components/Header";
-
+import SingleListing from "./pages/SingleListing";
 
 
 
