@@ -21,7 +21,8 @@ function App() {
         <Route path="/signup" element={<SignUp />} />
         <Route path="/signin" element={<SignIn />} />
         <Route path="/profile" element={<Profile />} />
-        <Route path="/create-listing" element={<CreateListing />} />      
+        <Route path="/create-listing" element={<CreateListing />} />
+        <Route path="/listings/:listingId" element={<SingleListing />} />
         <Route path="*" element={<div>404 Not Found</div>} />
       </Routes>
     </BrowserRouter>

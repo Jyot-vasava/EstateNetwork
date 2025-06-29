@@ -27,11 +27,13 @@ const CreateListing = () => {
   const [loading, setLoading] = useState(false);
   // Common handler for form fields
   const handleChange = (e) => {
-    if (e.target.id === "sale" || e.target.id === "rent") {
+    if (e.target.id === "sale" || e.target.id === "rent")
+       {
       setFormData({
         ...formData,
         type: e.target.id,
       });
+      console.log(updatedFormData);
       return;
     }
 
@@ -44,6 +46,7 @@ const CreateListing = () => {
         ...formData,
         [e.target.id]: e.target.checked,
       });
+      console.log(updatedFormData);
       return;
     }
 
@@ -57,6 +60,7 @@ const CreateListing = () => {
         ...formData,
         [e.target.id]: e.target.value,
       });
+      console.log(updatedFormData);
     }
   };
 
@@ -140,6 +144,7 @@ const CreateListing = () => {
   // Submit handler: sends form data with uploaded image URLs
   const handleSubmit = async (e) => {
     e.preventDefault();
+    try{
 
     // Check if images are uploaded
     if (!formData.imageUrls || formData.imageUrls.length < 1) {
@@ -158,7 +163,7 @@ const CreateListing = () => {
     setLoading(true);
     setError(false);
 
-    try {
+    
       const res = await fetch("/api/listing/create", {
         method: "POST",
         headers: {
@@ -177,14 +182,20 @@ const CreateListing = () => {
       if (data.success === false) {
         setError(data.message);
       } else {
-        // Navigate to home page after successful creation
-        navigate("/");
+        navigate(`/listings/${data._id}`);
       }
     } catch (err) {
       setLoading(false);
       setError(err.message || "Something went wrong");
     }
   };
+
+  const handleRemoveImage = (index) => {
+    const newUrls = [...formData.imageUrls];
+    newUrls.splice(index, 1);
+    setFormData({ ...formData, imageUrls: newUrls });
+  };
+  
 
   return (
     <main className="min-h-screen flex flex-col items-center bg-gray-100 py-10">
