@@ -162,7 +162,7 @@ const UpdateListing = () => {
       }
 
       toast.success(data.message || "Listing updated successfully!");
-      navigate("/profile");
+      navigate(`/listings/${id}`);
     } catch (error) {
       toast.error("Failed to update listing");
       console.error(error);

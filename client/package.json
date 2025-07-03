@@ -15,6 +15,7 @@
     "axios": "^1.10.0",
     "firebase": "^11.9.1",
     "lodash.debounce": "^4.0.8",
+    "lucide-react": "^0.525.0",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
     "react-hot-toast": "^2.5.2",
@@ -24,6 +25,7 @@
     "react-router-dom": "^7.6.2",
     "react-toastify": "^11.0.5",
     "redux-persist": "^6.0.0",
+    "swiper": "^11.2.10",
     "tailwindcss": "^4.1.10"
   },
   "devDependencies": {

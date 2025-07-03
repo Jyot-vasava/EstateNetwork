@@ -8,6 +8,7 @@ import { v2 as cloudinary } from "cloudinary";
 import cookieParser from "cookie-parser";
 import path from "path";
 
+
 dotenv.config();
 const __dirname = path.resolve();
 const app = express();
@@ -16,6 +17,7 @@ const app = express();
 app.use(express.json({ limit: "10mb" }));
 app.use(express.urlencoded({ extended: true, limit: "10mb" }));
 app.use(cookieParser());
+app.use("/api/listings", listingRoutes); 
 
 
 // CORS middleware
