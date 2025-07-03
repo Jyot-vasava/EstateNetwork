@@ -101,9 +101,10 @@ export const getListing = async (req, res, next) => {
   }
 };
 
-// Update listing
+// FIXED: Complete rewrite of updateListing controller
 export const updateListing = async (req, res, next) => {
   try {
+    // First, find the listing to check ownership
     const listing = await Listing.findById(req.params.id);
 
     if (!listing) {
@@ -115,6 +116,7 @@ export const updateListing = async (req, res, next) => {
       return next(errorHandler(401, "You can only update your own listings"));
     }
 
+    // Validate the update data
     const {
       name,
       description,
@@ -130,13 +132,30 @@ export const updateListing = async (req, res, next) => {
       imageurl,
     } = req.body;
 
-    // Validation
+    // Check required fields
+    if (
+      !name ||
+      !description ||
+      !address ||
+      !imageurl ||
+      imageurl.length === 0
+    ) {
+      return next(errorHandler(400, "Please provide all required fields"));
+    }
+
+    if (imageurl.length > 6) {
+      return next(
+        errorHandler(400, "You can only upload 6 images per listing")
+      );
+    }
+
     if (offer && regularprice <= discountedprice) {
       return next(
         errorHandler(400, "Discount price must be lower than regular price")
       );
     }
 
+    // Update the listing
     const updatedListing = await Listing.findByIdAndUpdate(
       req.params.id,
       {
@@ -153,7 +172,7 @@ export const updateListing = async (req, res, next) => {
         offer: Boolean(offer),
         imageurl,
       },
-      { new: true }
+      { new: true, runValidators: true }
     );
 
     res.status(200).json({

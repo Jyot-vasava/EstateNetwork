@@ -6,7 +6,8 @@ import SignIn from "./pages/SignIn";
 import Profile from "./pages/Profile";
 import CreateListing from "./pages/createlisting";
 import Header from "./components/Header";
-import SingleListing from "./pages/SingleListing";
+import UpdateListing from "./pages/UpdateListing";
+
 
 
 
@@ -22,7 +23,7 @@ function App() {
         <Route path="/signin" element={<SignIn />} />
         <Route path="/profile" element={<Profile />} />
         <Route path="/create-listing" element={<CreateListing />} />
-        <Route path="/listings/:listingId" element={<SingleListing />} />
+        <Route path="/update-listing/:id" element={<UpdateListing />} />
         <Route path="*" element={<div>404 Not Found</div>} />
       </Routes>
     </BrowserRouter>
