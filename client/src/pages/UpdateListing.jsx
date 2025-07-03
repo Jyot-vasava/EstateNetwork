@@ -6,7 +6,7 @@ import { toast } from "react-hot-toast";
 const UpdateListing = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { currentUser } = useSelector((state) => state.user);
+  const { user } = useSelector((state) => state.user);
   const [loading, setLoading] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [images, setImages] = useState([]);
@@ -39,7 +39,7 @@ const UpdateListing = () => {
         }
 
         // Check if user owns the listing
-        if (data.userRef !== currentUser._id) {
+        if (data.userRef !== user._id) {
           toast.error("You can only edit your own listings");
           navigate("/profile");
           return;
@@ -55,7 +55,7 @@ const UpdateListing = () => {
     };
 
     fetchListing();
-  }, [id, currentUser._id, navigate]);
+  }, [id, user._id, navigate]);
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
