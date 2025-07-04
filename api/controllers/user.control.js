@@ -3,24 +3,8 @@ import Listing from "../models/listing.model.js"; // Import Listing model
 import bcryptjs from "bcryptjs";
 import { errorHandler } from "../utils/error.js";
 
-export const getUser = async (req, res, next) => {
-  try {
-    const user = await User.findById(req.params.id);
-    if (!user) {
-      return next(errorHandler(404, "User not found"));
-    }
-
-    // Only return safe public information
-    const publicUserData = {
-      username: user.username,
-      email: user.email,
-      _id: user._id,
-    };
-
-    res.status(200).json(publicUserData);
-  } catch (error) {
-    next(error);
-  }
+export const getUser = (req, res) => {
+  res.status(200).json({ message: "jack is osm" });
 };
 
 export const updateUser = async (req, res, next) => {

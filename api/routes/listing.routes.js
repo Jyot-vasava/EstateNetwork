@@ -102,6 +102,6 @@ router.put("/update/:id", verifyToken, updateListing);
 router.delete("/delete/:id", verifyToken, deleteListing);
 
 // Get single listing (put this after specific routes)
-router.get("/get/:id", getListing);
+router.get("/:id", getListing);
 
 export default router;

@@ -12,9 +12,6 @@ import {
 import { Link } from "react-router-dom";
 import { Toaster } from "react-hot-toast";
 
-
-
-
 const Profile = () => {
   const { user, loading, error } = useSelector((state) => state.user);
   const dispatch = useDispatch();
@@ -194,25 +191,64 @@ const Profile = () => {
     }
   };
 
+  // FIXED: Updated the handleShowListings function with proper error handling and API endpoint
   const handleShowListings = async () => {
     try {
       setListingsLoading(true);
       setShowListingserror(false);
-      const response = await fetch(`/api/user/listings/${user._id}`, {
+
+      // Option 1: Use the listing route (recommended)
+      const response = await fetch(`/api/listing/user/${user._id}`, {
+        method: "GET",
         credentials: "include",
+        headers: {
+          "Content-Type": "application/json",
+        },
       });
-      const data = await response.json();
-      if (data.success === false) {
-        setShowListingserror(true);
-        setListingsLoading(false);
-        return;
+
+      // Option 2: Alternative - use user route (uncomment if you prefer this)
+      // const response = await fetch(`/api/user/listings/${user._id}`, {
+      //   method: "GET",
+      //   credentials: "include",
+      //   headers: {
+      //     "Content-Type": "application/json",
+      //   },
+      // });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(
+          errorData.message || `HTTP error! status: ${response.status}`
+        );
       }
-      console.log("User listings:", data);
-      setUserListings(data);
+
+      const data = await response.json();
+      console.log("API Response:", data);
+
+      // Handle different response structures
+      let listings = [];
+      if (Array.isArray(data)) {
+        listings = data;
+      } else if (data.success && Array.isArray(data.listings)) {
+        listings = data.listings;
+      } else if (data.listings && Array.isArray(data.listings)) {
+        listings = data.listings;
+      } else {
+        console.warn("Unexpected response format:", data);
+        listings = [];
+      }
+
+      setUserListings(listings);
       setListingsLoading(false);
+
+      if (listings.length === 0) {
+        setMessage("No listings found for your account.");
+      }
     } catch (error) {
+      console.error("Error fetching listings:", error);
       setShowListingserror(true);
       setListingsLoading(false);
+      setMessage(error.message || "Failed to load listings. Please try again.");
     }
   };
 
@@ -293,10 +329,11 @@ const Profile = () => {
 
           {message && (
             <div
-              className={`p-4 rounded-xl text-center shadow-md ${message.includes("successfully")
+              className={`p-4 rounded-xl text-center shadow-md ${
+                message.includes("successfully")
                   ? "bg-gradient-to-r from-green-50 to-emerald-50 text-green-700 border border-green-200"
                   : "bg-gradient-to-r from-red-50 to-rose-50 text-red-700 border border-red-200"
-                }`}
+              }`}
             >
               {message}
             </div>
@@ -358,8 +395,8 @@ const Profile = () => {
             {uploadingImage
               ? "Uploading Image..."
               : loading
-                ? "Updating..."
-                : "Update Profile"}
+              ? "Updating..."
+              : "Update Profile"}
           </button>
 
           <Link to={"/create-listing"}>
@@ -405,16 +442,21 @@ const Profile = () => {
                   {/* Image Section */}
                   <div className="relative h-48 overflow-hidden">
                     <img
-                      src={listing.imageurl[0] || "/api/placeholder/400/300"}
+                      src={
+                        listing.imageurl?.[0] ||
+                        listing.images?.[0] ||
+                        "/api/placeholder/400/300"
+                      }
                       alt={listing.name}
                       className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
                     />
                     <div className="absolute top-4 left-4">
                       <span
-                        className={`px-3 py-1 rounded-full text-xs font-semibold ${listing.type === "rent"
+                        className={`px-3 py-1 rounded-full text-xs font-semibold ${
+                          listing.type === "rent"
                             ? "bg-blue-500 text-white"
                             : "bg-green-500 text-white"
-                          }`}
+                        }`}
                       >
                         {listing.type === "rent" ? "For Rent" : "For Sale"}
                       </span>
@@ -488,8 +530,11 @@ const Profile = () => {
 
                     {/* Action Buttons */}
                     <div className="flex gap-2">
-                      <Link to={`/update-listing/${listing._id}`}>
-                      ✏️ Edit
+                      <Link
+                        to={`/update-listing/${listing._id}`}
+                        className="flex-1 bg-gradient-to-r from-blue-500 to-blue-600 text-white py-2 px-4 rounded-lg font-medium hover:from-blue-600 hover:to-blue-700 transition-all transform hover:scale-[1.02] text-sm text-center"
+                      >
+                        ✏️ Edit
                       </Link>
                       <button
                         onClick={() => handleDeleteListing(listing._id)}

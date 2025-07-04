@@ -30,7 +30,7 @@ const UpdateListing = () => {
     const fetchListing = async () => {
       try {
         setLoading(true);
-        const res = await fetch(`/api/listing/${id}`);
+        const res = await fetch(`/api/listings/${id}`);
         const data = await res.json();
 
         if (data.success === false) {
@@ -162,7 +162,7 @@ const UpdateListing = () => {
       }
 
       toast.success(data.message || "Listing updated successfully!");
-      navigate(`/listings/${id}`);
+      navigate("/profile");
     } catch (error) {
       toast.error("Failed to update listing");
       console.error(error);

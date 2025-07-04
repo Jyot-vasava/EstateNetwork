@@ -11,11 +11,6 @@ import Listing from "./pages/Listing";
 import Search from "./pages/search";
 
 
-
-
-
-
-
 function App() {
   return (
     <BrowserRouter>
@@ -31,7 +26,6 @@ function App() {
         <Route path="/create-listing" element={<CreateListing />} />
         <Route path="/update-listing/:id" element={<UpdateListing />} />
         <Route path="*" element={<div>404 Not Found</div>} />
-        
       </Routes>
     </BrowserRouter>
   );

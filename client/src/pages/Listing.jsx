@@ -385,21 +385,6 @@ const Listing = () => {
               </div>
             </div>
 
-            {/* Contact Section - Debug */}
-            {/* <div className="mt-6 p-4 border border-blue-300 rounded-lg">
-              <h3 className="text-lg font-semibold mb-2">
-                Contact Section Debug
-              </h3>
-              <div className="text-sm text-gray-600 mb-4">
-                <p>User exists: {user ? "Yes" : "No"}</p>
-                <p>User ID: {user?._id || "Not available"}</p>
-                <p>Listing userRef: {listing?.userRef || "Not available"}</p>
-                <p>
-                  Are they different:{" "}
-                  {user && listing.userRef !== user._id ? "Yes" : "No"}
-                </p>
-                <p>Contact state: {contact.toString()}</p>
-              </div> */}
 
               {user && listing.userRef !== user._id && !contact && (
                 <button
