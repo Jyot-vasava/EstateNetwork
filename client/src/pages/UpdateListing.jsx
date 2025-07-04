@@ -30,10 +30,11 @@ const UpdateListing = () => {
     const fetchListing = async () => {
       try {
         setLoading(true);
-        const res = await fetch(`/api/listings/${id}`);
+        // Fixed: Use the correct API endpoint
+        const res = await fetch(`/api/listing/get/${id}`);
         const data = await res.json();
 
-        if (data.success === false) {
+        if (!res.ok) {
           toast.error(data.message || "Failed to fetch listing");
           return;
         }
@@ -45,17 +46,20 @@ const UpdateListing = () => {
           return;
         }
 
+        // Update form data with fetched listing data
         setFormData(data);
       } catch (error) {
         toast.error("Failed to fetch listing");
-        console.error(error);
+        console.error("Fetch error:", error);
       } finally {
         setLoading(false);
       }
     };
 
-    fetchListing();
-  }, [id, user._id, navigate]);
+    if (id && user?._id) {
+      fetchListing();
+    }
+  }, [id, user?._id, navigate]);
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -118,7 +122,7 @@ const UpdateListing = () => {
       toast.success("Images uploaded successfully");
     } catch (error) {
       toast.error("Failed to upload images");
-      console.error(error);
+      console.error("Upload error:", error);
     } finally {
       setUploading(false);
     }
@@ -165,7 +169,7 @@ const UpdateListing = () => {
       navigate("/profile");
     } catch (error) {
       toast.error("Failed to update listing");
-      console.error(error);
+      console.error("Submit error:", error);
     } finally {
       setLoading(false);
     }

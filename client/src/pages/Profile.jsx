@@ -167,6 +167,7 @@ const Profile = () => {
 
       if (data.success) {
         dispatch(deleteUserSuccess());
+        window.location.replace("/signin");
         setMessage("Account deleted successfully");
       } else {
         dispatch(deleteUserFailure(data.message));
