@@ -9,8 +9,15 @@ export const getUser = async (req, res, next) => {
     if (!user) {
       return next(errorHandler(404, "User not found"));
     }
-    const { password, ...rest } = user._doc;
-    res.status(200).json(rest);
+
+    // Only return safe public information
+    const publicUserData = {
+      username: user.username,
+      email: user.email,
+      _id: user._id,
+    };
+
+    res.status(200).json(publicUserData);
   } catch (error) {
     next(error);
   }

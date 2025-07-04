@@ -11,6 +11,7 @@ export default defineConfig({
   proxy: {
     '/api': {
       target: "http://localhost:3000", 
+      changeOrigin: true, // proxy to localhost:3000
       secure: false, // if the target is using https, set this to true
     },
   },
