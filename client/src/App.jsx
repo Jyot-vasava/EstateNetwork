@@ -8,6 +8,7 @@ import CreateListing from "./pages/createlisting";
 import Header from "./components/Header";
 import UpdateListing from "./pages/UpdateListing";
 import Listing from "./pages/Listing";
+import Search from "./pages/search";
 
 
 
@@ -25,6 +26,7 @@ function App() {
         <Route path="/signup" element={<SignUp />} />
         <Route path="/signin" element={<SignIn />} />
         <Route path="/listings/:listingId" element={<Listing />} />
+        <Route path="/search" element={<Search />} />
         <Route path="/profile" element={<Profile />} />
         <Route path="/create-listing" element={<CreateListing />} />
         <Route path="/update-listing/:id" element={<UpdateListing />} />
