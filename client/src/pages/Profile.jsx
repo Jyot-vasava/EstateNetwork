@@ -198,7 +198,7 @@ const Profile = () => {
       setListingsLoading(true);
       setShowListingserror(false);
 
-      // Option 1: Use the listing route (recommended)
+      // Fetch user's listings from API endpoint
       const response = await fetch(`/api/listing/user/${user._id}`, {
         method: "GET",
         credentials: "include",
@@ -207,14 +207,6 @@ const Profile = () => {
         },
       });
 
-      // Option 2: Alternative - use user route (uncomment if you prefer this)
-      // const response = await fetch(`/api/user/listings/${user._id}`, {
-      //   method: "GET",
-      //   credentials: "include",
-      //   headers: {
-      //     "Content-Type": "application/json",
-      //   },
-      // });
 
       if (!response.ok) {
         const errorData = await response.json();
@@ -459,7 +451,7 @@ const Profile = () => {
                             : "bg-green-500 text-white"
                         }`}
                       >
-                        {listing.type === "rent" ? "For Rent" : "For Sale"}
+                        {listing.type === "rent" ? "For Rent" : "For Sell"}
                       </span>
                     </div>
                     {listing.offer && (

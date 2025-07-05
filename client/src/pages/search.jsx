@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import ListingItem from "../components/listingitem";
 
 const Search = () => {
   // State for sidebar data
@@ -11,13 +13,15 @@ const Search = () => {
       parking: false,
       furnished: false,
     },
-    sort: "regularprice_desc",
+    sort: "createdAt_desc",
   });
 
   // State for search results
   const [listings, setListings] = useState([]);
   const [loading, setLoading] = useState(false);
   const [showMore, setShowMore] = useState(false);
+  const [error, setError] = useState(null);
+  const navigate = useNavigate();
 
   // Handle input changes
   const handleChange = (e) => {
@@ -49,35 +53,44 @@ const Search = () => {
   };
 
   // Handle form submission
-  const handleSubmit = async () => {
+  const handleSubmit = async (e) => {
+    e.preventDefault();
     setLoading(true);
+    setError(null);
 
     try {
       const urlParams = new URLSearchParams();
       urlParams.set("searchTerm", sidebarData.searchTerm);
-      urlParams.set("sort", sidebarData.sort);
 
-      // Add type filters to URL params
+      // Parse sort to get field and order
+      const [sortField, sortOrder] = sidebarData.sort.split("_");
+      urlParams.set("sort", sortField);
+      urlParams.set("order", sortOrder);
+
+      // Set type parameters
       Object.entries(sidebarData.type).forEach(([key, value]) => {
         if (value) {
-          urlParams.set(key, "true");
+          urlParams.set(key, value.toString());
         }
       });
 
       const searchQuery = urlParams.toString();
-      const res = await fetch(`/api/listing/get?${searchQuery}`);
-      const data = await res.json();
+      navigate(`/search?${searchQuery}`);
 
-      if (data.success === false) {
-        setLoading(false);
-        return;
+      const res = await fetch(`/api/listing/get?${searchQuery}`);
+
+      if (!res.ok) {
+        throw new Error(`HTTP error! status: ${res.status}`);
       }
+
+      const data = await res.json();
 
       setListings(data);
       setLoading(false);
-      setShowMore(data.length === 9); // Show "Show More" if we have 9 results (assuming limit is 9)
+      setShowMore(data.length === 9); // Show "Show More" if we have 9 results
     } catch (error) {
       console.error("Error fetching listings:", error);
+      setError("Failed to fetch listings. Please try again.");
       setLoading(false);
     }
   };
@@ -86,61 +99,58 @@ const Search = () => {
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
     const searchTermFromUrl = urlParams.get("searchTerm");
-    const typeFromUrl = urlParams.get("type");
     const sortFromUrl = urlParams.get("sort");
+    const orderFromUrl = urlParams.get("order");
     const rentFromUrl = urlParams.get("rent");
     const sellFromUrl = urlParams.get("sell");
     const offerFromUrl = urlParams.get("offer");
     const parkingFromUrl = urlParams.get("parking");
     const furnishedFromUrl = urlParams.get("furnished");
 
-    if (
-      searchTermFromUrl ||
-      typeFromUrl ||
-      sortFromUrl ||
-      rentFromUrl ||
-      sellFromUrl ||
-      offerFromUrl ||
-      parkingFromUrl ||
-      furnishedFromUrl
-    ) {
-      setSidebarData({
-        searchTerm: searchTermFromUrl || "",
-        type: {
-          rent: rentFromUrl === "true",
-          sell: sellFromUrl === "true",
-          offer: offerFromUrl === "true",
-          parking: parkingFromUrl === "true",
-          furnished: furnishedFromUrl === "true",
-        },
-        sort: sortFromUrl || "regularprice_desc",
-      });
-    }
+    // Update sidebar data with URL parameters
+    setSidebarData({
+      searchTerm: searchTermFromUrl || "",
+      type: {
+        rent: rentFromUrl === "true",
+        sell: sellFromUrl === "true",
+        offer: offerFromUrl === "true",
+        parking: parkingFromUrl === "true",
+        furnished: furnishedFromUrl === "true",
+      },
+      sort:
+        sortFromUrl && orderFromUrl
+          ? `${sortFromUrl}_${orderFromUrl}`
+          : "createdAt_desc",
+    });
+
+    // Fetch listings function
+    const fetchListings = async () => {
+      setLoading(true);
+      setError(null);
+
+      try {
+        const searchQuery = urlParams.toString();
+        const res = await fetch(`/api/listing/get?${searchQuery}`);
+
+        if (!res.ok) {
+          throw new Error(`HTTP error! status: ${res.status}`);
+        }
+
+        const data = await res.json();
+
+        setListings(data);
+        setShowMore(data.length === 9);
+      } catch (error) {
+        console.error("Error fetching listings:", error);
+        setError("Failed to fetch listings. Please try again.");
+      } finally {
+        setLoading(false);
+      }
+    };
 
     // Fetch listings on component mount
     fetchListings();
-  }, []);
-
-  // Fetch listings function
-  const fetchListings = async () => {
-    setLoading(true);
-    try {
-      const res = await fetch("/api/listing/get");
-      const data = await res.json();
-
-      if (data.success === false) {
-        setLoading(false);
-        return;
-      }
-
-      setListings(data);
-      setLoading(false);
-      setShowMore(data.length === 9);
-    } catch (error) {
-      console.error("Error fetching listings:", error);
-      setLoading(false);
-    }
-  };
+  }, [window.location.search]);
 
   // Handle show more listings
   const handleShowMore = async () => {
@@ -148,27 +158,20 @@ const Search = () => {
     const startIndex = numberOfListings;
 
     setLoading(true);
-    try {
-      const urlParams = new URLSearchParams();
-      urlParams.set("searchTerm", sidebarData.searchTerm);
-      urlParams.set("sort", sidebarData.sort);
-      urlParams.set("startIndex", startIndex);
+    setError(null);
 
-      // Add type filters to URL params
-      Object.entries(sidebarData.type).forEach(([key, value]) => {
-        if (value) {
-          urlParams.set(key, "true");
-        }
-      });
+    try {
+      const urlParams = new URLSearchParams(window.location.search);
+      urlParams.set("startIndex", startIndex.toString());
 
       const searchQuery = urlParams.toString();
       const res = await fetch(`/api/listing/get?${searchQuery}`);
-      const data = await res.json();
 
-      if (data.success === false) {
-        setLoading(false);
-        return;
+      if (!res.ok) {
+        throw new Error(`HTTP error! status: ${res.status}`);
       }
+
+      const data = await res.json();
 
       if (data.length < 9) {
         setShowMore(false);
@@ -178,6 +181,7 @@ const Search = () => {
       setLoading(false);
     } catch (error) {
       console.error("Error fetching more listings:", error);
+      setError("Failed to load more listings. Please try again.");
       setLoading(false);
     }
   };
@@ -185,7 +189,7 @@ const Search = () => {
   return (
     <div className="flex flex-col md:flex-row">
       <div className="p-7 border-b-2 md:border-b-0 md:border-r-2 md:min-h-screen">
-        <div className="flex flex-col gap-4">
+        <form onSubmit={handleSubmit} className="flex flex-col gap-8">
           <div className="flex items-center gap-2">
             <label className="whitespace-nowrap font-semibold">
               Search Term:
@@ -282,13 +286,13 @@ const Search = () => {
           </div>
 
           <button
-            onClick={handleSubmit}
+            type="submit"
             className="bg-slate-700 text-white p-3 rounded-lg hover:bg-slate-600 disabled:opacity-50"
             disabled={loading}
           >
             {loading ? "Searching..." : "Search"}
           </button>
-        </div>
+        </form>
       </div>
 
       <div className="flex-1">
@@ -296,79 +300,22 @@ const Search = () => {
           Listing results:
         </h1>
         <div className="p-7 flex flex-wrap gap-4">
+          {error && (
+            <div className="w-full bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
+              {error}
+            </div>
+          )}
+
           {loading && listings.length === 0 ? (
             <p className="text-slate-600">Searching...</p>
-          ) : listings.length === 0 ? (
+          ) : listings.length === 0 && !loading ? (
             <p className="text-slate-600">
               No listings found. Try adjusting your search criteria.
             </p>
           ) : (
             <>
               {listings.map((listing) => (
-                <div
-                  key={listing._id}
-                  className="bg-white shadow-md hover:shadow-lg transition-shadow overflow-hidden rounded-lg w-full sm:w-[330px]"
-                >
-                  <img
-                    src={
-                      listing.imageurl[0] ||
-                      "https://via.placeholder.com/400x300?text=No+Image"
-                    }
-                    alt={listing.name}
-                    className="h-[320px] sm:h-[220px] w-full object-cover hover:scale-105 transition-scale duration-300"
-                  />
-                  <div className="p-3 flex flex-col gap-2 w-full">
-                    <p className="truncate text-lg font-semibold text-slate-700">
-                      {listing.name}
-                    </p>
-                    <div className="flex items-center gap-1">
-                      <svg
-                        className="h-4 w-4 text-green-700"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
-                        />
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
-                        />
-                      </svg>
-                      <p className="text-sm text-gray-600 truncate">
-                        {listing.address}
-                      </p>
-                    </div>
-                    <p className="text-sm text-gray-600 line-clamp-2">
-                      {listing.description}
-                    </p>
-                    <p className="text-slate-500 mt-2 font-semibold">
-                      $
-                      {listing.offer
-                        ? listing.discountedprice.toLocaleString()
-                        : listing.regularprice.toLocaleString()}
-                      {listing.type === "rent" && " / month"}
-                    </p>
-                    <div className="text-slate-700 flex gap-4">
-                      <div className="font-bold text-xs">
-                        {listing.bedrooms > 1
-                          ? `${listing.bedrooms} beds`
-                          : `${listing.bedrooms} bed`}
-                      </div>
-                      <div className="font-bold text-xs">
-                        {listing.bathrooms > 1
-                          ? `${listing.bathrooms} baths`
-                          : `${listing.bathrooms} bath`}
-                      </div>
-                    </div>
-                  </div>
-                </div>
+                <ListingItem key={listing._id} listing={listing} />
               ))}
               {showMore && (
                 <button

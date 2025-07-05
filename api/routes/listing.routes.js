@@ -6,6 +6,7 @@ import {
   deleteListing,
   updateListing,
   getListing,
+  getListings, // NEW IMPORT
 } from "../controllers/listing.control.js";
 import multer from "multer";
 import { v2 as cloudinary } from "cloudinary";
@@ -101,7 +102,10 @@ router.put("/update/:id", verifyToken, updateListing);
 // Delete listing
 router.delete("/delete/:id", verifyToken, deleteListing);
 
-// Get single listing (put this after specific routes)
+// Get listings with search functionality - NEW ROUTE
+router.get("/get", getListings);
+
+// Get single listing (put this after the general get route)
 router.get("/get/:id", getListing);
 
 export default router;
