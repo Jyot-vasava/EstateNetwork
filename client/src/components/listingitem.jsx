@@ -6,7 +6,7 @@ import { FaBed, FaBath, FaParking, FaCouch } from "react-icons/fa";
 const ListingItem = ({ listing }) => {
   return (
     <div className="bg-white shadow-md hover:shadow-lg transition-shadow overflow-hidden rounded-lg w-full sm:w-[330px]">
-      <Link to={`/listing/${listing._id}`}>
+      <Link to={`/listings/${listing._id}`}>
         <img
           src={
             listing.imageurl?.[0] ||
@@ -18,7 +18,7 @@ const ListingItem = ({ listing }) => {
       </Link>
 
       <div className="p-3 flex flex-col gap-2 w-full">
-        <Link to={`/listing/${listing._id}`}>
+        <Link to={`/listings/${listing._id}`}>
           <p className="truncate text-lg font-semibold text-slate-700 hover:text-slate-900 transition-colors">
             {listing.name}
           </p>
