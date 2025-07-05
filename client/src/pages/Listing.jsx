@@ -177,6 +177,8 @@ const Listing = () => {
               </div>
             </div>
 
+            
+
             {console.log("user:", user)}
             {console.log("listing.userRef:", listing.userRef)}
 
