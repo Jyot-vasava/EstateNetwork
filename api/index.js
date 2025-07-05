@@ -7,18 +7,18 @@ import listingRoutes from "./routes/listing.routes.js";
 import { v2 as cloudinary } from "cloudinary";
 import cookieParser from "cookie-parser";
 import path from "path";
-
+import cors from "cors";
 
 dotenv.config();
 const __dirname = path.resolve();
 const app = express();
 
 // Middleware
+app.use(cors());
 app.use(express.json({ limit: "10mb" }));
 app.use(express.urlencoded({ extended: true, limit: "10mb" }));
 app.use(cookieParser());
-app.use("/api/listings", listingRoutes); 
-
+app.use("/api/listings", listingRoutes);
 
 // CORS middleware
 app.use((req, res, next) => {
@@ -84,7 +84,6 @@ app.use((err, req, res, next) => {
     message,
   });
 });
-
 
 app.get("/api/health", (req, res) => {
   res.status(200).json({
