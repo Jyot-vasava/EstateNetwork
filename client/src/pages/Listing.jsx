@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Navigation } from "swiper/modules";
 import "swiper/css";
@@ -13,6 +13,7 @@ const Listing = () => {
   const [error, setError] = useState(false);
   const { user } = useSelector((state) => state.user);
   const [contact, setContact] = useState(false);
+  const navigate = useNavigate();
 
   const params = useParams();
   console.log(listing);
@@ -43,6 +44,10 @@ const Listing = () => {
     fetchListing();
   }, [params.listingId]);
 
+  const handleBackToProfile = () => {
+    navigate("/profile");
+  };
+
   return (
     <main>
       {loading && <p className="text-center my-7 text-xl">Loading...</p>}
@@ -52,7 +57,18 @@ const Listing = () => {
         </p>
       )}
       {listing && !loading && !error && (
-        <div className="m-5">
+        <div className=" mt-1 bg-blue-200">
+          {/* Back to Profile Button */}
+          <div className="mb-4">
+            <button
+              onClick={handleBackToProfile}
+              className="bg-gray-600 text-white p-2 rounded-lg hover:opacity-75  duration-200 flex items-center gap-2 "
+            >
+              <span>←</span>
+              Back to Profile
+            </button>
+          </div>
+
           {/* Image Carousel */}
           <Swiper
             modules={[Navigation]}
@@ -68,7 +84,7 @@ const Listing = () => {
                   <img
                     src={url}
                     alt={`${listing.name} ${index + 1}`}
-                    className="w-full  h-96  object-cover"
+                    className="w-full  h-98  object-cover"
                   />
                 </SwiperSlide>
               ))}
@@ -176,8 +192,6 @@ const Listing = () => {
                 </p>
               </div>
             </div>
-
-            
 
             {console.log("user:", user)}
             {console.log("listing.userRef:", listing.userRef)}

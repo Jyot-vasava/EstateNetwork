@@ -525,16 +525,22 @@ const Profile = () => {
                     <div className="flex gap-2">
                       <Link
                         to={`/update-listing/${listing._id}`}
-                        className="flex-1 bg-gradient-to-r from-blue-500 to-blue-600 text-white py-2 px-4 rounded-lg font-medium hover:from-blue-600 hover:to-blue-700 transition-all transform hover:scale-[1.02] text-sm text-center"
+                        className="flex-1 bg-blue-500 text-white py-2 px-4 rounded-lg font-medium hover:from-blue-600 hover:to-blue-700 transition-all transform hover:scale-[1.02] text-sm text-center"
                       >
                         ✏️ Edit
                       </Link>
                       <button
                         onClick={() => handleDeleteListing(listing._id)}
-                        className="flex-1 bg-gradient-to-r from-red-500 to-red-600 text-white py-2 px-4 rounded-lg font-medium hover:from-red-600 hover:to-red-700 transition-all transform hover:scale-[1.02] text-sm"
+                        className="flex-1 bg-red-600 text-white py-2 px-4 rounded-lg font-medium hover:from-red-600 hover:to-red-700 transition-all transform hover:scale-[1.02] text-sm"
                       >
                         🗑️ Delete
                       </button>
+                      <Link
+                        to={`/listings/${listing._id}`}
+                        className="flex-1 bg-slate-600 text-white py-2 px-4 rounded-lg font-medium hover:from-blue-600 hover:to-blue-700 transition-all transform hover:scale-[1.02] text-sm text-center"
+                      >
+                        View 
+                      </Link>
                     </div>
                   </div>
                 </div>
