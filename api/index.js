@@ -85,6 +85,10 @@ app.use((err, req, res, next) => {
   });
 });
 
+app.get("/", (_, res) => {
+  res.send("Hello, World!");
+});
+
 app.get("/api/health", (req, res) => {
   res.status(200).json({
     success: true,
