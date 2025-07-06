@@ -207,7 +207,6 @@ const Profile = () => {
         },
       });
 
-
       if (!response.ok) {
         const errorData = await response.json();
         throw new Error(
@@ -280,295 +279,322 @@ const Profile = () => {
   };
 
   return (
-    <div className="max-w-7xl mx-auto p-6">
-      <div className="bg-gradient-to-br from-slate-50 to-slate-100 rounded-3xl shadow-2xl p-8 relative overflow-hidden">
-        {/* Decorations */}
-        <div className="absolute top-0 right-0 w-40 h-40 bg-gradient-to-br from-blue-200/30 to-purple-200/30 rounded-full blur-3xl"></div>
-        <div className="absolute bottom-0 left-0 w-32 h-32 bg-gradient-to-tr from-green-200/30 to-blue-200/30 rounded-full blur-2xl"></div>
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <div className="bg-white rounded-3xl shadow-2xl p-8 lg:p-12 relative overflow-hidden">
+          {/* Decorative Background Elements */}
+          <div className="absolute top-0 right-0 w-40 h-40 bg-gradient-to-br from-blue-200/30 to-purple-200/30 rounded-full blur-3xl"></div>
+          <div className="absolute bottom-0 left-0 w-32 h-32 bg-gradient-to-tr from-yellow-200/30 to-blue-200/30 rounded-full blur-2xl"></div>
 
-        <form onSubmit={handleSubmit} className="mt-8 space-y-6 relative z-10">
-          <div className="flex flex-col items-center">
-            <div
-              className="relative w-32 h-32 rounded-full overflow-hidden shadow-lg hover:scale-105 transition-transform cursor-pointer group ring-4 ring-white"
-              onClick={handleImageClick}
-            >
-              <img
-                src={
-                  profileImage ||
-                  user?.profilePicture ||
-                  "https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y"
-                }
-                alt="Profile"
-                className="w-full h-full object-cover"
+          <form onSubmit={handleSubmit} className="space-y-8 relative z-10">
+            {/* Profile Header */}
+            <div className="flex flex-col items-center text-center">
+              <div
+                className="relative w-32 h-32 rounded-full overflow-hidden shadow-2xl hover:scale-105 transition-all duration-300 cursor-pointer group ring-4 ring-blue-700"
+                onClick={handleImageClick}
+              >
+                <img
+                  src={
+                    profileImage ||
+                    user?.profilePicture ||
+                    "https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y"
+                  }
+                  alt="Profile"
+                  className="w-full h-full object-cover"
+                />
+                <div className="absolute inset-0 bg-black/60 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                  <span className="text-white text-sm font-semibold">
+                    {uploadingImage ? "Uploading..." : "Change Photo"}
+                  </span>
+                </div>
+              </div>
+              <input
+                type="file"
+                ref={fileInputRef}
+                onChange={handleImageChange}
+                accept="image/*"
+                className="hidden"
               />
-              <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                <span className="text-white text-sm font-medium">
-                  {uploadingImage ? "Uploading..." : "Change Photo"}
-                </span>
+              <h1 className="text-4xl font-bold mt-6 text-transparent bg-clip-text bg-gradient-to-r from-slate-700 to-slate-900">
+                {formData.username}
+              </h1>
+              <p className="text-gray-600 text-lg mt-2">{formData.email}</p>
+            </div>
+
+            {/* Alert Messages */}
+            {message && (
+              <div
+                className={`p-4 rounded-2xl text-center shadow-lg ${
+                  message.includes("successfully")
+                    ? "bg-gradient-to-r from-green-50 to-emerald-50 text-green-700 border border-green-200"
+                    : "bg-gradient-to-r from-red-50 to-rose-50 text-red-700 border border-red-200"
+                }`}
+              >
+                {message}
+              </div>
+            )}
+
+            {error && (
+              <div className="p-4 rounded-2xl text-center bg-gradient-to-r from-red-50 to-rose-50 text-red-700 border border-red-200 shadow-lg">
+                {error}
+              </div>
+            )}
+
+            {/* Form Fields */}
+            <div className="space-y-6">
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-3">
+                  Username
+                </label>
+                <input
+                  type="text"
+                  id="username"
+                  value={formData.username}
+                  onChange={handleInputChange}
+                  className="w-full p-4 rounded-2xl border-2 border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-700 focus:border-transparent transition-all duration-300 shadow-sm hover:shadow-md"
+                  required
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-3">
+                  Email
+                </label>
+                <input
+                  type="email"
+                  id="email"
+                  value={formData.email}
+                  onChange={handleInputChange}
+                  className="w-full p-4 rounded-2xl border-2 border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-700 focus:border-transparent transition-all duration-300 shadow-sm hover:shadow-md"
+                  required
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-3">
+                  Password (leave blank to keep current)
+                </label>
+                <input
+                  type="password"
+                  id="password"
+                  value={formData.password}
+                  onChange={handleInputChange}
+                  className="w-full p-4 rounded-2xl border-2 border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-700 focus:border-transparent transition-all duration-300 shadow-sm hover:shadow-md"
+                  placeholder="Enter new password"
+                />
               </div>
             </div>
-            <input
-              type="file"
-              ref={fileInputRef}
-              onChange={handleImageChange}
-              accept="image/*"
-              className="hidden"
-            />
-            <h1 className="text-3xl font-bold mt-4 bg-gradient-to-r from-slate-700 to-slate-900 bg-clip-text text-transparent">
-              {formData.username}
-            </h1>
-            <p className="text-gray-500 text-sm">{formData.email}</p>
-          </div>
 
-          {message && (
-            <div
-              className={`p-4 rounded-xl text-center shadow-md ${
-                message.includes("successfully")
-                  ? "bg-gradient-to-r from-green-50 to-emerald-50 text-green-700 border border-green-200"
-                  : "bg-gradient-to-r from-red-50 to-rose-50 text-red-700 border border-red-200"
-              }`}
-            >
-              {message}
-            </div>
-          )}
+            {/* Action Buttons */}
+            <div className="space-y-4">
+              <button
+                type="submit"
+                disabled={loading || uploadingImage}
+                className="w-full bg-gradient-to-r from-blue-600 to-blue-700 text-white py-4 rounded-2xl font-semibold uppercase hover:from-blue-700 hover:to-blue-800 transition-all duration-300 transform hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-xl"
+              >
+                {uploadingImage
+                  ? "Uploading Image..."
+                  : loading
+                  ? "Updating..."
+                  : "Update Profile"}
+              </button>
 
-          {error && (
-            <div className="p-4 rounded-xl text-center bg-gradient-to-r from-red-50 to-rose-50 text-red-700 border border-red-200">
-              {error}
-            </div>
-          )}
-
-          <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-2">
-              Username
-            </label>
-            <input
-              type="text"
-              id="username"
-              value={formData.username}
-              onChange={handleInputChange}
-              className="w-full p-4 rounded-xl border-2 border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent transition-all shadow-sm"
-              required
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-2">
-              Email
-            </label>
-            <input
-              type="email"
-              id="email"
-              value={formData.email}
-              onChange={handleInputChange}
-              className="w-full p-4 rounded-xl border-2 border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent transition-all shadow-sm"
-              required
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-2">
-              Password (leave blank to keep current)
-            </label>
-            <input
-              type="password"
-              id="password"
-              value={formData.password}
-              onChange={handleInputChange}
-              className="w-full p-4 rounded-xl border-2 border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent transition-all shadow-sm"
-              placeholder="Enter new password"
-            />
-          </div>
-
-          <button
-            type="submit"
-            disabled={loading || uploadingImage}
-            className="w-full bg-gradient-to-r from-blue-500 to-blue-600 text-white py-4 rounded-xl font-semibold uppercase hover:from-blue-600 hover:to-blue-700 transition-all transform hover:scale-[1.02] disabled:opacity-50 shadow-lg"
-          >
-            {uploadingImage
-              ? "Uploading Image..."
-              : loading
-              ? "Updating..."
-              : "Update Profile"}
-          </button>
-
-          <Link to={"/create-listing"}>
-            <button className="w-full bg-gradient-to-r from-green-500 to-green-600 text-white py-4 rounded-xl font-semibold uppercase hover:from-green-600 hover:to-green-700 transition-all transform hover:scale-[1.02] shadow-lg">
-              Create New Listing
-            </button>
-          </Link>
-        </form>
-
-        <div className="flex justify-between mt-8 text-sm">
-          <span
-            onClick={handleDeleteAccount}
-            className="text-red-500 hover:text-red-600 cursor-pointer font-medium transition-colors"
-          >
-            Delete Account
-          </span>
-          <span
-            onClick={handleShowListings}
-            className="text-green-500 hover:text-green-600 cursor-pointer font-medium transition-colors"
-          >
-            {listingsLoading ? "Loading..." : "Show Listings"}
-          </span>
-          <span
-            onClick={handleSignOut}
-            className="text-blue-500 hover:text-blue-600 cursor-pointer font-medium transition-colors"
-          >
-            Sign Out
-          </span>
-        </div>
-
-        {/* Enhanced Show listings section */}
-        {userListings.length > 0 && (
-          <div className="mt-12 relative z-10">
-            <h2 className="text-2xl font-bold text-center mb-8 bg-gradient-to-r from-slate-700 to-slate-900 bg-clip-text text-transparent">
-              Your Listings ({userListings.length})
-            </h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {userListings.map((listing) => (
-                <div
-                  key={listing._id}
-                  className="bg-white rounded-2xl shadow-xl overflow-hidden hover:shadow-2xl transition-all duration-300 hover:scale-[1.02] group"
+              <Link to={"/create-listing"} className="block">
+                <button
+                  type="button"
+                  className="w-full bg-gradient-to-r from-green-600 to-green-700 text-white py-4 rounded-2xl font-semibold uppercase hover:from-green-700 hover:to-green-800 transition-all duration-300 transform hover:scale-[1.02] shadow-lg hover:shadow-xl"
                 >
-                  {/* Image Section */}
-                  <div className="relative h-48 overflow-hidden">
-                    <img
-                      src={
-                        listing.imageurl?.[0] ||
-                        listing.images?.[0] ||
-                        "/api/placeholder/400/300"
-                      }
-                      alt={listing.name}
-                      className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
-                    />
-                    <div className="absolute top-4 left-4">
-                      <span
-                        className={`px-3 py-1 rounded-full text-xs font-semibold ${
-                          listing.type === "rent"
-                            ? "bg-blue-500 text-white"
-                            : "bg-green-500 text-white"
-                        }`}
-                      >
-                        {listing.type === "rent" ? "For Rent" : "For Sell"}
-                      </span>
-                    </div>
-                    {listing.offer && (
-                      <div className="absolute top-4 right-4">
-                        <span className="bg-red-500 text-white px-3 py-1 rounded-full text-xs font-semibold">
-                          Offer
+                  Create New Listing
+                </button>
+              </Link>
+            </div>
+          </form>
+
+          {/* Quick Actions */}
+          <div className="flex flex-col sm:flex-row justify-between items-center mt-12 gap-4 text-sm">
+            <span
+              onClick={handleDeleteAccount}
+              className="text-red-600 hover:text-red-700 cursor-pointer font-semibold transition-colors duration-300 hover:underline"
+            >
+              Delete Account
+            </span>
+            <span
+              onClick={handleShowListings}
+              className="text-blue-700 hover:text-blue-800 cursor-pointer font-semibold transition-colors duration-300 hover:underline"
+            >
+              {listingsLoading ? "Loading..." : "Show Listings"}
+            </span>
+            <span
+              onClick={handleSignOut}
+              className="text-slate-600 hover:text-slate-700 cursor-pointer font-semibold transition-colors duration-300 hover:underline"
+            >
+              Sign Out
+            </span>
+          </div>
+
+          {/* Listings Section */}
+          {userListings.length > 0 && (
+            <div className="mt-16 relative z-10">
+              <div className="text-center mb-12">
+                <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+                  Your Listings ({userListings.length})
+                </h2>
+                <div className="w-24 h-1 bg-gradient-to-r from-blue-700 to-yellow-700 mx-auto rounded-full"></div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                {userListings.map((listing) => (
+                  <div
+                    key={listing._id}
+                    className="bg-white rounded-2xl shadow-xl overflow-hidden hover:shadow-2xl transition-all duration-300 hover:scale-[1.02] group border border-gray-100"
+                  >
+                    {/* Image Section */}
+                    <div className="relative h-48 overflow-hidden">
+                      <img
+                        src={
+                          listing.imageurl?.[0] ||
+                          listing.images?.[0] ||
+                          "/api/placeholder/400/300"
+                        }
+                        alt={listing.name}
+                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+                      />
+                      <div className="absolute top-4 left-4">
+                        <span
+                          className={`px-3 py-1 rounded-full text-xs font-semibold shadow-md ${
+                            listing.type === "rent"
+                              ? "bg-blue-700 text-white"
+                              : "bg-green-600 text-white"
+                          }`}
+                        >
+                          {listing.type === "rent" ? "For Rent" : "For Sale"}
                         </span>
                       </div>
-                    )}
-                  </div>
-
-                  {/* Content Section */}
-                  <div className="p-6">
-                    <h3 className="font-bold text-lg mb-2 text-gray-800 line-clamp-2">
-                      {listing.name}
-                    </h3>
-                    <p className="text-gray-600 text-sm mb-3 line-clamp-1">
-                      📍 {listing.address}
-                    </p>
-
-                    {/* Price Section */}
-                    <div className="mb-4">
-                      {listing.offer ? (
-                        <div className="flex items-center gap-2">
-                          <span className="text-2xl font-bold text-green-600">
-                            {formatPrice(listing.discountedprice)}
-                          </span>
-                          <span className="text-sm text-gray-500 line-through">
-                            {formatPrice(listing.regularprice)}
+                      {listing.offer && (
+                        <div className="absolute top-4 right-4">
+                          <span className="bg-yellow-700 text-white px-3 py-1 rounded-full text-xs font-semibold shadow-md">
+                            Special Offer
                           </span>
                         </div>
-                      ) : (
-                        <span className="text-2xl font-bold text-green-600">
-                          {formatPrice(listing.regularprice)}
-                        </span>
-                      )}
-                      {listing.type === "rent" && (
-                        <span className="text-sm text-gray-500 ml-1">
-                          /month
-                        </span>
                       )}
                     </div>
 
-                    {/* Property Details */}
-                    <div className="flex items-center gap-4 mb-4 text-sm text-gray-600">
-                      <span className="flex items-center gap-1">
-                        🛏️ {listing.bedrooms} bed
-                        {listing.bedrooms !== 1 ? "s" : ""}
-                      </span>
-                      <span className="flex items-center gap-1">
-                        🚿 {listing.bathrooms} bath
-                        {listing.bathrooms !== 1 ? "s" : ""}
-                      </span>
-                    </div>
+                    {/* Content Section */}
+                    <div className="p-6">
+                      <h3 className="font-bold text-xl mb-2 text-gray-800 line-clamp-2">
+                        {listing.name}
+                      </h3>
+                      <p className="text-gray-600 text-sm mb-4 line-clamp-1">
+                        📍 {listing.address}
+                      </p>
 
-                    {/* Features */}
-                    <div className="flex flex-wrap gap-2 mb-4">
-                      {listing.parking && (
-                        <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-xs">
-                          🚗 Parking
-                        </span>
-                      )}
-                      {listing.furnished && (
-                        <span className="bg-purple-100 text-purple-800 px-2 py-1 rounded-full text-xs">
-                          🪑 Furnished
-                        </span>
-                      )}
-                    </div>
+                      {/* Price Section */}
+                      <div className="mb-4">
+                        {listing.offer ? (
+                          <div className="flex items-center gap-2">
+                            <span className="text-2xl font-bold text-green-600">
+                              {formatPrice(listing.discountedprice)}
+                            </span>
+                            <span className="text-sm text-gray-500 line-through">
+                              {formatPrice(listing.regularprice)}
+                            </span>
+                          </div>
+                        ) : (
+                          <span className="text-2xl font-bold text-green-600">
+                            {formatPrice(listing.regularprice)}
+                          </span>
+                        )}
+                        {listing.type === "rent" && (
+                          <span className="text-sm text-gray-500 ml-1">
+                            /month
+                          </span>
+                        )}
+                      </div>
 
-                    {/* Action Buttons */}
-                    <div className="flex gap-2">
-                      <Link
-                        to={`/update-listing/${listing._id}`}
-                        className="flex-1 bg-blue-500 text-white py-2 px-4 rounded-lg font-medium hover:from-blue-600 hover:to-blue-700 transition-all transform hover:scale-[1.02] text-sm text-center"
-                      >
-                        ✏️ Edit
-                      </Link>
-                      <button
-                        onClick={() => handleDeleteListing(listing._id)}
-                        className="flex-1 bg-red-600 text-white py-2 px-4 rounded-lg font-medium hover:from-red-600 hover:to-red-700 transition-all transform hover:scale-[1.02] text-sm"
-                      >
-                        🗑️ Delete
-                      </button>
-                      <Link
-                        to={`/listings/${listing._id}`}
-                        className="flex-1 bg-slate-600 text-white py-2 px-4 rounded-lg font-medium hover:from-blue-600 hover:to-blue-700 transition-all transform hover:scale-[1.02] text-sm text-center"
-                      >
-                        View 
-                      </Link>
+                      {/* Property Details */}
+                      <div className="flex items-center gap-4 mb-4 text-sm text-gray-600">
+                        <span className="flex items-center gap-1">
+                          🛏️ {listing.bedrooms} bed
+                          {listing.bedrooms !== 1 ? "s" : ""}
+                        </span>
+                        <span className="flex items-center gap-1">
+                          🚿 {listing.bathrooms} bath
+                          {listing.bathrooms !== 1 ? "s" : ""}
+                        </span>
+                      </div>
+
+                      {/* Features */}
+                      <div className="flex flex-wrap gap-2 mb-6">
+                        {listing.parking && (
+                          <span className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-xs font-medium">
+                            🚗 Parking
+                          </span>
+                        )}
+                        {listing.furnished && (
+                          <span className="bg-yellow-100 text-yellow-800 px-3 py-1 rounded-full text-xs font-medium">
+                            🪑 Furnished
+                          </span>
+                        )}
+                      </div>
+
+                      {/* Action Buttons */}
+                      <div className="flex gap-2">
+                        <Link
+                          to={`/update-listing/${listing._id}`}
+                          className="flex-1 bg-gradient-to-r from-blue-600 to-blue-700 text-white py-3 px-4 rounded-xl font-semibold hover:from-blue-700 hover:to-blue-800 transition-all duration-300 transform hover:scale-[1.02] text-sm text-center shadow-lg"
+                        >
+                          ✏️ Edit
+                        </Link>
+                        <button
+                          onClick={() => handleDeleteListing(listing._id)}
+                          className="flex-1 bg-gradient-to-r from-red-600 to-red-700 text-white py-3 px-4 rounded-xl font-semibold hover:from-red-700 hover:to-red-800 transition-all duration-300 transform hover:scale-[1.02] text-sm shadow-lg"
+                        >
+                          🗑️ Delete
+                        </button>
+                        <Link
+                          to={`/listings/${listing._id}`}
+                          className="flex-1 bg-gradient-to-r from-slate-600 to-slate-700 text-white py-3 px-4 rounded-xl font-semibold hover:from-slate-700 hover:to-slate-800 transition-all duration-300 transform hover:scale-[1.02] text-sm text-center shadow-lg"
+                        >
+                          👁️ View
+                        </Link>
+                      </div>
                     </div>
                   </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* No listings message */}
-        {userListings.length === 0 &&
-          !listingsLoading &&
-          !showListingserror && (
-            <div className="mt-8 text-center">
-              <div className="bg-gradient-to-r from-gray-50 to-gray-100 rounded-2xl p-8">
-                <div className="text-6xl mb-4">🏠</div>
-                <p className="text-gray-600 text-lg">No listings found</p>
-                <p className="text-gray-500 text-sm mt-2">
-                  Click "Show Listings" to refresh or create your first listing
-                </p>
+                ))}
               </div>
             </div>
           )}
 
-        {showListingserror && (
-          <div className="mt-4 p-4 rounded-xl text-center bg-gradient-to-r from-red-50 to-rose-50 text-red-700 border border-red-200">
-            ❌ Error showing listings. Please try again.
-          </div>
-        )}
+          {/* No Listings Message */}
+          {userListings.length === 0 &&
+            !listingsLoading &&
+            !showListingserror && (
+              <div className="mt-16 text-center">
+                <div className="bg-gradient-to-r from-slate-50 to-slate-100 rounded-3xl p-12 shadow-lg">
+                  <div className="text-8xl mb-6">🏠</div>
+                  <h3 className="text-2xl font-bold text-gray-700 mb-2">
+                    No Listings Found
+                  </h3>
+                  <p className="text-gray-600 text-lg mb-4">
+                    You haven't created any listings yet
+                  </p>
+                  <p className="text-gray-500 text-sm">
+                    Click "Show Listings" to refresh or create your first
+                    listing
+                  </p>
+                </div>
+              </div>
+            )}
+
+          {/* Error Message */}
+          {showListingserror && (
+            <div className="mt-8 p-6 rounded-2xl text-center bg-gradient-to-r from-red-50 to-rose-50 text-red-700 border border-red-200 shadow-lg">
+              <div className="text-4xl mb-2">❌</div>
+              <p className="font-semibold">Error loading listings</p>
+              <p className="text-sm mt-1">Please try again later</p>
+            </div>
+          )}
+        </div>
       </div>
       <Toaster position="top-right" />
     </div>

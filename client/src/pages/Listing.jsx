@@ -49,163 +49,188 @@ const Listing = () => {
   };
 
   return (
-    <main>
-      {loading && <p className="text-center my-7 text-xl">Loading...</p>}
+    <main className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
+      {loading && (
+        <div className="flex items-center justify-center min-h-screen">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-blue-600 mx-auto mb-4"></div>
+            <p className="text-xl text-white">Loading property details...</p>
+          </div>
+        </div>
+      )}
       {error && (
-        <p className="text-center my-7 text-2xl text-red-500">
-          Failed to fetch listing
-        </p>
+        <div className="flex items-center justify-center min-h-screen">
+          <div className="text-center bg-red-500/20 border border-red-500/50 text-red-200 p-8 rounded-2xl">
+            <p className="text-2xl font-semibold">Failed to fetch listing</p>
+            <p className="text-lg mt-2">Please try again later</p>
+          </div>
+        </div>
       )}
       {listing && !loading && !error && (
-        <div className=" mt-1 bg-blue-200">
+        <div className="relative">
           {/* Back to Profile Button */}
-          <div className="mb-4">
+          <div className="absolute top-6 left-6 z-20">
             <button
               onClick={handleBackToProfile}
-              className="bg-gray-600 text-white p-2 rounded-lg hover:opacity-75  duration-200 flex items-center gap-2 "
+              className="bg-white/20 backdrop-blur-lg border border-white/30 text-white px-6 py-3 rounded-xl hover:bg-white/30 transition-all duration-300 flex items-center gap-3 shadow-lg transform hover:scale-105"
             >
-              <span>←</span>
-              Back to Profile
+              <span className="text-xl">←</span>
+              <span className="font-semibold">Back to Profile</span>
             </button>
           </div>
 
           {/* Image Carousel */}
-          <Swiper
-            modules={[Navigation]}
-            navigation={true}
-            spaceBetween={50}
-            slidesPerView={1}
-            loop={true}
-            className="mySwiper h-96"
-          >
-            {listing.imageurl &&
-              listing.imageurl.map((url, index) => (
-                <SwiperSlide key={index}>
-                  <img
-                    src={url}
-                    alt={`${listing.name} ${index + 1}`}
-                    className="w-full  h-98  object-cover"
-                  />
-                </SwiperSlide>
-              ))}
-          </Swiper>
+          <div className="relative">
+            <Swiper
+              modules={[Navigation]}
+              navigation={true}
+              spaceBetween={50}
+              slidesPerView={1}
+              loop={true}
+              className="mySwiper h-96 lg:h-[500px]"
+            >
+              {listing.imageurl &&
+                listing.imageurl.map((url, index) => (
+                  <SwiperSlide key={index}>
+                    <div className="relative w-full h-full">
+                      <img
+                        src={url}
+                        alt={`${listing.name} ${index + 1}`}
+                        className="w-full h-full object-cover"
+                      />
+                      <div className="absolute inset-0 bg-black/20"></div>
+                    </div>
+                  </SwiperSlide>
+                ))}
+            </Swiper>
+          </div>
 
           {/* Listing Details */}
-          <div className="max-w-4xl mx-auto p-6">
-            <div className="flex flex-col gap-6">
-              {/* Title and Basic Info */}
-              <div>
-                <h1 className="text-3xl font-bold text-gray-900">
-                  {listing.name}
-                </h1>
-                <p className="text-gray-600 mt-2">{listing.address}</p>
-                <div className="flex items-center gap-4 mt-4">
-                  <span className="bg-red-900 text-white px-3 py-1 rounded-md text-sm">
-                    {listing.type === "rent" ? "For Rent" : "For Sale"}
-                  </span>
-                  {listing.offer && (
-                    <span className="bg-green-900 text-white px-3 py-1 rounded-md text-sm">
-                      Special Offer
+          <div className="max-w-6xl mx-auto px-6 py-12">
+            <div className="bg-white/10 backdrop-blur-lg border border-white/20 rounded-2xl p-8 shadow-2xl">
+              <div className="flex flex-col gap-8">
+                {/* Title and Basic Info */}
+                <div>
+                  <h1 className="text-4xl lg:text-5xl font-bold text-white mb-4">
+                    {listing.name}
+                  </h1>
+                  <p className="text-xl text-gray-300 mb-6">
+                    {listing.address}
+                  </p>
+                  <div className="flex items-center gap-4 flex-wrap">
+                    <span className="bg-blue-600 text-white px-6 py-2 rounded-full text-sm font-semibold shadow-lg">
+                      {listing.type === "rent" ? "For Rent" : "For Sale"}
                     </span>
-                  )}
+                    {listing.offer && (
+                      <span className="bg-green-600 text-white px-6 py-2 rounded-full text-sm font-semibold shadow-lg">
+                        🔥 Special Offer
+                      </span>
+                    )}
+                  </div>
                 </div>
-              </div>
 
-              {/* Price */}
-              <div>
-                {listing.offer ? (
-                  <div className="flex flex-col gap-2">
-                    <div className="flex items-center gap-3">
-                      <span className="bg-red-600 text-white px-3 py-1 rounded-full text-sm font-medium">
-                        🏷️ SPECIAL OFFER
-                      </span>
-                      <span className="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm font-medium">
-                        Save $
-                        {(
-                          listing.regularprice - listing.discountedprice
-                        ).toLocaleString()}
-                      </span>
+                {/* Price */}
+                <div className="bg-white/10 backdrop-blur-lg border border-white/20 rounded-xl p-6">
+                  {listing.offer ? (
+                    <div className="flex flex-col gap-4">
+                      <div className="flex items-center gap-4 flex-wrap">
+                        <span className="bg-red-600 text-white px-4 py-2 rounded-full text-sm font-medium shadow-lg">
+                          🏷️ SPECIAL OFFER
+                        </span>
+                        <span className="bg-green-100 text-green-800 px-4 py-2 rounded-full text-sm font-medium shadow-lg">
+                          Save $
+                          {(
+                            listing.regularprice - listing.discountedprice
+                          ).toLocaleString()}
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-4 flex-wrap">
+                        <span className="text-4xl lg:text-5xl font-bold text-green-400">
+                          ${listing.discountedprice.toLocaleString()}
+                        </span>
+                        <span className="text-2xl text-gray-400 line-through">
+                          ${listing.regularprice.toLocaleString()}
+                        </span>
+                        {listing.type === "rent" && (
+                          <span className="text-lg font-normal text-gray-300">
+                            / month
+                          </span>
+                        )}
+                      </div>
                     </div>
-                    <div className="flex items-center gap-3">
-                      <span className="text-3xl font-bold text-green-600">
-                        ${listing.discountedprice.toLocaleString()}
-                      </span>
-                      <span className="text-xl text-gray-500 line-through">
+                  ) : (
+                    <div className="flex items-center gap-4 flex-wrap">
+                      <span className="text-4xl lg:text-5xl font-bold text-green-400">
                         ${listing.regularprice.toLocaleString()}
                       </span>
                       {listing.type === "rent" && (
-                        <span className="text-base font-normal text-gray-600">
+                        <span className="text-lg font-normal text-gray-300">
                           / month
                         </span>
                       )}
                     </div>
+                  )}
+                </div>
+
+                {/* Property Features */}
+                <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                  <div className="text-center p-6 bg-white/10 backdrop-blur-lg border border-white/20 rounded-xl shadow-lg">
+                    <div className="text-xl font-bold text-white">
+                      {listing.bedrooms > 1
+                        ? listing.bedrooms + " Bedrooms"
+                        : listing.bedrooms + " Bedroom"}
+                    </div>
                   </div>
-                ) : (
-                  <div className="flex items-center gap-2">
-                    <span className="text-3xl font-bold text-green-600">
-                      ${listing.regularprice.toLocaleString()}
-                    </span>
-                    {listing.type === "rent" && (
-                      <span className="text-base font-normal text-gray-600">
-                        / month
-                      </span>
-                    )}
+                  <div className="text-center p-6 bg-white/10 backdrop-blur-lg border border-white/20 rounded-xl shadow-lg">
+                    <div className="text-xl font-bold text-white">
+                      {listing.bathrooms > 1
+                        ? listing.bathrooms + " Bathrooms"
+                        : listing.bathrooms + " Bathroom"}
+                    </div>
                   </div>
-                )}
+                  <div className="text-center p-6 bg-white/10 backdrop-blur-lg border border-white/20 rounded-xl shadow-lg">
+                    <div className="text-xl font-bold text-white">
+                      {listing.parking ? "Parking ✓" : "No Parking ✗"}
+                    </div>
+                  </div>
+                  <div className="text-center p-6 bg-white/10 backdrop-blur-lg border border-white/20 rounded-xl shadow-lg">
+                    <div className="text-xl font-bold text-white">
+                      {listing.furnished ? "Furnished ✓" : "Unfurnished ✗"}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Description */}
+                <div className="bg-white/10 backdrop-blur-lg border border-white/20 rounded-xl p-6">
+                  <h2 className="text-2xl font-semibold text-white mb-4">
+                    Property Description
+                  </h2>
+                  <p className="text-gray-300 leading-relaxed text-lg">
+                    {listing.description}
+                  </p>
+                </div>
               </div>
 
-              {/* Property Features */}
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                <div className="text-center p-3 bg-gray-100 rounded-lg">
-                  <div className="text-2xl font-bold text-gray-900">
-                    {listing.bedrooms > 1
-                      ? listing.bedrooms + " Bedrooms"
-                      : listing.bedrooms + " Bedroom"}
-                  </div>
-                </div>
-                <div className="text-center p-3 bg-gray-100 rounded-lg">
-                  <div className="text-2xl font-bold text-gray-900">
-                    {listing.bathrooms > 1
-                      ? listing.bathrooms + " Bathrooms"
-                      : listing.bathrooms + " Bathroom"}
-                  </div>
-                </div>
-                <div className="text-center p-3 bg-gray-100 rounded-lg">
-                  <div className="text-2xl font-bold text-gray-900">
-                    {listing.parking ? "Parking" : " No Parking"}
-                  </div>
-                </div>
-                <div className="text-center p-3 bg-gray-100 rounded-lg">
-                  <div className="text-2xl font-bold text-gray-900">
-                    {listing.furnished ? "Furnished" : "Unfurnished"}
-                  </div>
-                </div>
-              </div>
+              {console.log("user:", user)}
+              {console.log("listing.userRef:", listing.userRef)}
 
-              {/* Description */}
-              <div>
-                <h2 className="text-xl font-semibold text-gray-900 mb-3">
-                  Description
-                </h2>
-                <p className="text-gray-700 leading-relaxed">
-                  {listing.description}
-                </p>
-              </div>
+              {user && listing.userRef !== user._id && !contact && (
+                <div className="mt-8 text-center">
+                  <button
+                    onClick={() => setContact(true)}
+                    className="bg-blue-600 text-white px-8 py-4 rounded-xl font-semibold hover:bg-blue-700 transition-all duration-300 transform hover:scale-105 shadow-lg text-lg"
+                  >
+                    Contact Landlord
+                  </button>
+                </div>
+              )}
+
+              {contact && (
+                <div className="mt-8 bg-white/10 backdrop-blur-lg border border-white/20 rounded-xl p-6">
+                  <Contact listing={listing} />
+                </div>
+              )}
             </div>
-
-            {console.log("user:", user)}
-            {console.log("listing.userRef:", listing.userRef)}
-
-            {user && listing.userRef !== user._id && !contact && (
-              <button
-                onClick={() => setContact(true)}
-                className="mt-6 bg-blue-500 text-white p-3 uppercase rounded-lg hover:bg-blue-700"
-              >
-                Contact Landlord
-              </button>
-            )}
-
-            {contact && <Contact listing={listing} />}
           </div>
         </div>
       )}

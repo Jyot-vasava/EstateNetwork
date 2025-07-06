@@ -27,8 +27,7 @@ const CreateListing = () => {
   const [loading, setLoading] = useState(false);
   // Common handler for form fields
   const handleChange = (e) => {
-    if (e.target.id === "sale" || e.target.id === "rent")
-       {
+    if (e.target.id === "sale" || e.target.id === "rent") {
       setFormData({
         ...formData,
         type: e.target.id,
@@ -144,26 +143,24 @@ const CreateListing = () => {
   // Submit handler: sends form data with uploaded image URLs
   const handleSubmit = async (e) => {
     e.preventDefault();
-    try{
+    try {
+      // Check if images are uploaded
+      if (!formData.imageUrls || formData.imageUrls.length < 1) {
+        return setError("You must upload at least one image");
+      }
 
-    // Check if images are uploaded
-    if (!formData.imageUrls || formData.imageUrls.length < 1) {
-      return setError("You must upload at least one image");
-    }
+      if (formData.imageUrls.length > 6) {
+        return setError("You can only upload 6 images per listing");
+      }
 
-    if (formData.imageUrls.length > 6) {
-      return setError("You can only upload 6 images per listing");
-    }
+      // Validate pricing
+      if (+formData.regularprice < +formData.discountedprice) {
+        return setError("Discount price must be lower than regular price");
+      }
 
-    // Validate pricing
-    if (+formData.regularprice < +formData.discountedprice) {
-      return setError("Discount price must be lower than regular price");
-    }
+      setLoading(true);
+      setError(false);
 
-    setLoading(true);
-    setError(false);
-
-    
       const res = await fetch("/api/listing/create", {
         method: "POST",
         headers: {
@@ -195,237 +192,255 @@ const CreateListing = () => {
     newUrls.splice(index, 1);
     setFormData({ ...formData, imageUrls: newUrls });
   };
-  
 
   return (
-    <main className="min-h-screen flex flex-col items-center bg-gray-100 py-10">
-      <h1 className="text-4xl font-bold text-gray-800 mb-6">Create Listing</h1>
+    <main className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 py-20">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="text-center mb-12">
+          <h1 className="text-4xl md:text-5xl font-bold text-white mb-4">
+            Create Listing
+          </h1>
+          <p className="text-xl text-gray-300">
+            List your property with us and reach thousands of potential buyers
+          </p>
+        </div>
 
-      <form
-        onSubmit={handleSubmit}
-        className="w-full max-w-6xl flex flex-col md:flex-row gap-10 bg-white p-6 rounded-lg shadow-lg"
-      >
-        {/* Left side: main form */}
-        <div className="w-full md:w-1/2 flex flex-col gap-5">
-          <input
-            type="text"
-            placeholder="Name"
-            className="w-full bg-slate-100 border border-gray-300 p-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-300 transition"
-            id="name"
-            maxLength="62"
-            minLength="5"
-            required
-            onChange={handleChange}
-            value={formData.name}
-          />
-          <textarea
-            placeholder="Description"
-            className="w-full bg-slate-100 border border-gray-300 p-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-300 transition min-h-[120px]"
-            id="description"
-            required
-            onChange={handleChange}
-            value={formData.description}
-          />
-          <input
-            type="text"
-            placeholder="Address"
-            className="w-full bg-slate-100 border border-gray-300 p-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-300 transition"
-            id="address"
-            required
-            onChange={handleChange}
-            value={formData.address}
-          />
+        <form
+          onSubmit={handleSubmit}
+          className="w-full max-w-6xl mx-auto flex flex-col lg:flex-row gap-8 bg-white/10 backdrop-blur-lg border border-white/20 p-8 rounded-2xl shadow-2xl"
+        >
+          {/* Left side: main form */}
+          <div className="w-full lg:w-1/2 flex flex-col gap-6">
+            <input
+              type="text"
+              placeholder="Property Name"
+              className="w-full bg-white/20 backdrop-blur-lg border border-white/30 text-white placeholder-gray-300 p-4 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-300"
+              id="name"
+              maxLength="62"
+              minLength="5"
+              required
+              onChange={handleChange}
+              value={formData.name}
+            />
+            <textarea
+              placeholder="Property Description"
+              className="w-full bg-white/20 backdrop-blur-lg border border-white/30 text-white placeholder-gray-300 p-4 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-300 min-h-[120px] resize-none"
+              id="description"
+              required
+              onChange={handleChange}
+              value={formData.description}
+            />
+            <input
+              type="text"
+              placeholder="Property Address"
+              className="w-full bg-white/20 backdrop-blur-lg border border-white/30 text-white placeholder-gray-300 p-4 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-300"
+              id="address"
+              required
+              onChange={handleChange}
+              value={formData.address}
+            />
 
-          <div className="flex gap-5 flex-wrap">
-            <div className="flex gap-2 items-center">
-              <input
-                type="checkbox"
-                id="sale"
-                className="w-5"
-                onChange={handleChange}
-                checked={formData.type === "sale"}
-              />
-              <span>Sell</span>
+            <div className="flex gap-6 flex-wrap">
+              <div className="flex gap-3 items-center">
+                <input
+                  type="checkbox"
+                  id="sale"
+                  className="w-5 h-5 text-blue-600 bg-white/20 border-white/30 rounded focus:ring-blue-500 focus:ring-2"
+                  onChange={handleChange}
+                  checked={formData.type === "sale"}
+                />
+                <span className="text-white font-medium">Sell</span>
+              </div>
+              <div className="flex gap-3 items-center">
+                <input
+                  type="checkbox"
+                  id="rent"
+                  className="w-5 h-5 text-blue-600 bg-white/20 border-white/30 rounded focus:ring-blue-500 focus:ring-2"
+                  onChange={handleChange}
+                  checked={formData.type === "rent"}
+                />
+                <span className="text-white font-medium">Rent</span>
+              </div>
+              <div className="flex gap-3 items-center">
+                <input
+                  type="checkbox"
+                  id="parking"
+                  className="w-5 h-5 text-blue-600 bg-white/20 border-white/30 rounded focus:ring-blue-500 focus:ring-2"
+                  onChange={handleChange}
+                  checked={formData.parking}
+                />
+                <span className="text-white font-medium">Parking</span>
+              </div>
+              <div className="flex gap-3 items-center">
+                <input
+                  type="checkbox"
+                  id="furnished"
+                  className="w-5 h-5 text-blue-600 bg-white/20 border-white/30 rounded focus:ring-blue-500 focus:ring-2"
+                  onChange={handleChange}
+                  checked={formData.furnished}
+                />
+                <span className="text-white font-medium">Furnished</span>
+              </div>
+              <div className="flex gap-3 items-center">
+                <input
+                  type="checkbox"
+                  id="offer"
+                  className="w-5 h-5 text-blue-600 bg-white/20 border-white/30 rounded focus:ring-blue-500 focus:ring-2"
+                  onChange={handleChange}
+                  checked={formData.offer}
+                />
+                <span className="text-white font-medium">Offer</span>
+              </div>
             </div>
-            <div className="flex gap-2 items-center">
-              <input
-                type="checkbox"
-                id="rent"
-                className="w-5"
-                onChange={handleChange}
-                checked={formData.type === "rent"}
-              />
-              <span>Rent</span>
-            </div>
-            <div className="flex gap-2 items-center">
-              <input
-                type="checkbox"
-                id="parking"
-                className="w-5"
-                onChange={handleChange}
-                checked={formData.parking}
-              />
-              <span>Parking</span>
-            </div>
-            <div className="flex gap-2 items-center">
-              <input
-                type="checkbox"
-                id="furnished"
-                className="w-5"
-                onChange={handleChange}
-                checked={formData.furnished}
-              />
-              <span>Furnished</span>
-            </div>
-            <div className="flex gap-2 items-center">
-              <input
-                type="checkbox"
-                id="offer"
-                className="w-5"
-                onChange={handleChange}
-                checked={formData.offer}
-              />
-              <span>Offer</span>
-            </div>
-          </div>
 
-          <div className="flex flex-wrap gap-5">
-            <div className="flex-1 min-w-[130px]">
-              <label className="font-semibold block text-sm">Beds</label>
-              <input
-                type="number"
-                id="bedrooms"
-                required
-                className="w-full mt-1 p-3 rounded-lg border transition-all"
-                min="1"
-                max="10"
-                onChange={handleChange}
-                value={formData.bedrooms}
-              />
-            </div>
-            <div className="flex-1 min-w-[130px]">
-              <label className="font-semibold block text-sm">Bathrooms</label>
-              <input
-                type="number"
-                id="bathrooms"
-                required
-                className="w-full mt-1 p-3 rounded-lg border transition-all"
-                min="1"
-                max="10"
-                onChange={handleChange}
-                value={formData.bathrooms}
-              />
-            </div>
-            <div className="flex-1 min-w-[180px]">
-              <label className="font-semibold block text-sm">
-                Regular Price{" "}
-                {formData.type === "rent" && (
-                  <span className="text-xs">(₹ / month)</span>
-                )}
-              </label>
-              <input
-                type="number"
-                id="regularprice"
-                required
-                className="w-full mt-1 p-3 rounded-lg border transition-all"
-                min="50"
-                max="10000000"
-                onChange={handleChange}
-                value={formData.regularprice}
-              />
-            </div>
-            {formData.offer && (
+            <div className="flex flex-wrap gap-4">
+              <div className="flex-1 min-w-[130px]">
+                <label className="font-semibold block text-white text-sm mb-2">
+                  Bedrooms
+                </label>
+                <input
+                  type="number"
+                  id="bedrooms"
+                  required
+                  className="w-full bg-white/20 backdrop-blur-lg border border-white/30 text-white p-3 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-300"
+                  min="1"
+                  max="10"
+                  onChange={handleChange}
+                  value={formData.bedrooms}
+                />
+              </div>
+              <div className="flex-1 min-w-[130px]">
+                <label className="font-semibold block text-white text-sm mb-2">
+                  Bathrooms
+                </label>
+                <input
+                  type="number"
+                  id="bathrooms"
+                  required
+                  className="w-full bg-white/20 backdrop-blur-lg border border-white/30 text-white p-3 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-300"
+                  min="1"
+                  max="10"
+                  onChange={handleChange}
+                  value={formData.bathrooms}
+                />
+              </div>
               <div className="flex-1 min-w-[180px]">
-                <label className="font-semibold block text-sm">
-                  Discounted Price{" "}
+                <label className="font-semibold block text-white text-sm mb-2">
+                  Regular Price{" "}
                   {formData.type === "rent" && (
-                    <span className="text-xs">(₹ / month)</span>
+                    <span className="text-xs text-gray-300">(₹ / month)</span>
                   )}
                 </label>
                 <input
                   type="number"
-                  id="discountedprice"
+                  id="regularprice"
                   required
-                  className="w-full mt-1 p-3 rounded-lg border transition-all"
-                  min="0"
+                  className="w-full bg-white/20 backdrop-blur-lg border border-white/30 text-white p-3 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-300"
+                  min="50"
                   max="10000000"
                   onChange={handleChange}
-                  value={formData.discountedprice}
+                  value={formData.regularprice}
                 />
+              </div>
+              {formData.offer && (
+                <div className="flex-1 min-w-[180px]">
+                  <label className="font-semibold block text-white text-sm mb-2">
+                    Discounted Price{" "}
+                    {formData.type === "rent" && (
+                      <span className="text-xs text-gray-300">(₹ / month)</span>
+                    )}
+                  </label>
+                  <input
+                    type="number"
+                    id="discountedprice"
+                    required
+                    className="w-full bg-white/20 backdrop-blur-lg border border-white/30 text-white p-3 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-300"
+                    min="0"
+                    max="10000000"
+                    onChange={handleChange}
+                    value={formData.discountedprice}
+                  />
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Right side: Image upload and preview */}
+          <div className="w-full lg:w-1/2 flex flex-col gap-6">
+            <div>
+              <p className="font-semibold text-white text-lg mb-2">
+                Property Images
+              </p>
+              <p className="text-sm text-gray-300">
+                The first image will be the cover photo (max 6 images)
+              </p>
+            </div>
+
+            <div className="flex gap-4">
+              <input
+                onChange={handleImageChange}
+                className="flex-1 bg-white/20 backdrop-blur-lg border border-white/30 text-white p-3 rounded-xl file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-600 file:text-white hover:file:bg-blue-700 transition-all duration-300"
+                type="file"
+                id="images"
+                accept="image/*"
+                multiple
+              />
+              <button
+                type="button"
+                disabled={uploading}
+                onClick={handleImageSubmit}
+                className="px-6 py-3 bg-green-600 text-white font-semibold rounded-xl hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 transform hover:scale-105 active:scale-95"
+              >
+                {uploading ? "Uploading..." : "Upload"}
+              </button>
+            </div>
+
+            {imageUploadError && (
+              <div className="bg-red-500/20 border border-red-500/50 text-red-200 p-3 rounded-xl">
+                <p className="text-sm">{imageUploadError}</p>
               </div>
             )}
-          </div>
-        </div>
 
-        {/* Right side: Image upload and preview */}
-        <div className="w-full md:w-1/2 flex flex-col gap-5">
-          <p className="font-semibold">
-            Images:
-            <span className="text-sm text-gray-500 ml-1">
-              (The first image will be cover - max 6)
-            </span>
-          </p>
+            {formData.imageUrls &&
+              formData.imageUrls.length > 0 &&
+              formData.imageUrls.map((url, index) => (
+                <div
+                  key={url}
+                  className="flex justify-between items-center p-4 bg-white/10 backdrop-blur-lg border border-white/20 rounded-xl"
+                >
+                  <img
+                    src={url}
+                    alt="listing image"
+                    className="w-20 h-20 object-cover rounded-lg border-2 border-white/30"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => handleRemoveImage(index)}
+                    className="px-4 py-2 bg-red-600 text-white font-semibold rounded-lg hover:bg-red-700 transition-all duration-300 transform hover:scale-105 active:scale-95"
+                  >
+                    Delete
+                  </button>
+                </div>
+              ))}
 
-          <div className="flex gap-4">
-            <input
-              onChange={handleImageChange}
-              className="p-3 border border-gray-300 rounded w-full"
-              type="file"
-              id="images"
-              accept="image/*"
-              multiple
-            />
+            {error && (
+              <div className="bg-red-500/20 border border-red-500/50 text-red-200 p-3 rounded-xl">
+                <p className="text-sm">{error}</p>
+              </div>
+            )}
+
             <button
-              type="button"
-              disabled={uploading}
-              onClick={handleImageSubmit}
-              className="p-3 text-green-700 border border-green-700 rounded uppercase hover:shadow-lg disabled:opacity-80"
+              type="submit"
+              disabled={loading || uploading}
+              className="w-full py-4 bg-blue-600 text-white font-semibold rounded-xl hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 transform hover:scale-105 active:scale-95 shadow-lg"
             >
-              {uploading ? "Uploading..." : "Upload"}
+              {loading ? "Creating Listing..." : "Create Listing"}
             </button>
           </div>
-
-          <p className="text-red-700 text-sm">
-            {imageUploadError && imageUploadError}
-          </p>
-
-          {formData.imageUrls &&
-            formData.imageUrls.length > 0 &&
-            formData.imageUrls.map((url, index) => (
-              <div
-                key={url}
-                className="flex justify-between p-3 border items-center"
-              >
-                <img
-                  src={url}
-                  alt="listing image"
-                  className="w-20 h-20 object-contain rounded-lg"
-                />
-                <button
-                  type="button"
-                  onClick={() => handleRemoveImage(index)}
-                  className="p-3 text-red-700 rounded-lg uppercase hover:opacity-75"
-                >
-                  Delete
-                </button>
-              </div>
-            ))}
-
-          {error && <p className="text-red-700 text-sm">{error}</p>}
-
-          <button
-            type="submit"
-            disabled={loading || uploading}
-            className="w-full p-3 rounded-lg border bg-slate-700 text-white hover:opacity-95 disabled:opacity-80 uppercase"
-          >
-            {loading ? "Creating..." : "Create Listing"}
-          </button>
-        </div>
-      </form>
+        </form>
+      </div>
     </main>
   );
-
- 
-}
+};
 
 export default CreateListing;

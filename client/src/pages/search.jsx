@@ -187,94 +187,98 @@ const Search = () => {
   };
 
   return (
-    <div className="flex flex-col md:flex-row">
-      <div className="p-7 border-b-2 md:border-b-0 md:border-r-2 md:min-h-screen">
-        <form onSubmit={handleSubmit} className="flex flex-col gap-8">
-          <div className="flex items-center gap-2">
-            <label className="whitespace-nowrap font-semibold">
+    <div className="flex flex-col md:flex-row min-h-screen bg-gray-50">
+      <div className="bg-white p-8 border-b-2 border-gray-200 md:border-b-0 md:border-r-2 md:min-h-screen md:w-80 shadow-lg">
+        <form onSubmit={handleSubmit} className="flex flex-col gap-6">
+          <div className="space-y-2">
+            <label className="block text-sm font-semibold text-gray-700">
               Search Term:
             </label>
             <input
               type="text"
               id="searchTerm"
-              placeholder="Search..."
-              className="border rounded-lg p-3 w-full"
+              placeholder="Search properties..."
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
               value={sidebarData.searchTerm}
               onChange={handleChange}
             />
           </div>
 
-          <div className="flex gap-2 flex-wrap items-center">
-            <label className="font-semibold">Type:</label>
-            <div className="flex gap-2 flex-wrap">
-              <div className="flex items-center gap-1">
+          <div className="space-y-3">
+            <label className="block text-sm font-semibold text-gray-700">
+              Property Type:
+            </label>
+            <div className="space-y-2">
+              <div className="flex items-center space-x-2">
                 <input
                   type="checkbox"
                   id="rent"
-                  className="w-5"
+                  className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
                   checked={sidebarData.type.rent}
                   onChange={handleChange}
                 />
-                <label htmlFor="rent" className="whitespace-nowrap">
+                <label htmlFor="rent" className="text-sm text-gray-700">
                   Rent
                 </label>
               </div>
-              <div className="flex items-center gap-1">
+              <div className="flex items-center space-x-2">
                 <input
                   type="checkbox"
                   id="sell"
-                  className="w-5"
+                  className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
                   checked={sidebarData.type.sell}
                   onChange={handleChange}
                 />
-                <label htmlFor="sell" className="whitespace-nowrap">
+                <label htmlFor="sell" className="text-sm text-gray-700">
                   Sell
                 </label>
               </div>
-              <div className="flex items-center gap-1">
+              <div className="flex items-center space-x-2">
                 <input
                   type="checkbox"
                   id="offer"
-                  className="w-5"
+                  className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
                   checked={sidebarData.type.offer}
                   onChange={handleChange}
                 />
-                <label htmlFor="offer" className="whitespace-nowrap">
+                <label htmlFor="offer" className="text-sm text-gray-700">
                   Offer
                 </label>
               </div>
-              <div className="flex items-center gap-1">
+              <div className="flex items-center space-x-2">
                 <input
                   type="checkbox"
                   id="parking"
-                  className="w-5"
+                  className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
                   checked={sidebarData.type.parking}
                   onChange={handleChange}
                 />
-                <label htmlFor="parking" className="whitespace-nowrap">
+                <label htmlFor="parking" className="text-sm text-gray-700">
                   Parking
                 </label>
               </div>
-              <div className="flex items-center gap-1">
+              <div className="flex items-center space-x-2">
                 <input
                   type="checkbox"
                   id="furnished"
-                  className="w-5"
+                  className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
                   checked={sidebarData.type.furnished}
                   onChange={handleChange}
                 />
-                <label htmlFor="furnished" className="whitespace-nowrap">
+                <label htmlFor="furnished" className="text-sm text-gray-700">
                   Furnished
                 </label>
               </div>
             </div>
           </div>
 
-          <div className="flex items-center gap-2">
-            <label className="font-semibold">Sort:</label>
+          <div className="space-y-2">
+            <label className="block text-sm font-semibold text-gray-700">
+              Sort By:
+            </label>
             <select
               id="sort"
-              className="border rounded-lg p-3"
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
               value={sidebarData.sort}
               onChange={handleChange}
             >
@@ -287,46 +291,67 @@ const Search = () => {
 
           <button
             type="submit"
-            className="bg-slate-700 text-white p-3 rounded-lg hover:bg-slate-600 disabled:opacity-50"
+            className="w-full bg-blue-600 text-white py-3 px-4 rounded-lg font-semibold hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 transform hover:scale-105"
             disabled={loading}
           >
-            {loading ? "Searching..." : "Search"}
+            {loading ? "Searching..." : "Search Properties"}
           </button>
         </form>
       </div>
 
-      <div className="flex-1">
-        <h1 className="text-3xl font-semibold border-b p-3 text-slate-700">
-          Listing results:
-        </h1>
-        <div className="p-7 flex flex-wrap gap-4">
+      <div className="flex-1 bg-white">
+        <div className="bg-gradient-to-r from-slate-800 to-slate-900 text-white p-6 shadow-lg">
+          <h1 className="text-3xl md:text-4xl font-bold">Search Results</h1>
+          <p className="text-gray-300 mt-2">Find your perfect property below</p>
+        </div>
+
+        <div className="p-6 md:p-8">
           {error && (
-            <div className="w-full bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
-              {error}
+            <div className="w-full bg-red-50 border border-red-200 text-red-700 px-6 py-4 rounded-lg mb-6">
+              <div className="flex items-center">
+                <div className="text-red-500 mr-3">⚠️</div>
+                <div>{error}</div>
+              </div>
             </div>
           )}
 
           {loading && listings.length === 0 ? (
-            <p className="text-slate-600">Searching...</p>
+            <div className="flex items-center justify-center py-20">
+              <div className="text-center">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+                <p className="text-gray-600 text-lg">
+                  Searching for properties...
+                </p>
+              </div>
+            </div>
           ) : listings.length === 0 && !loading ? (
-            <p className="text-slate-600">
-              No listings found. Try adjusting your search criteria.
-            </p>
+            <div className="text-center py-20">
+              <div className="text-gray-400 text-6xl mb-4">🏠</div>
+              <p className="text-gray-600 text-xl mb-2">No properties found</p>
+              <p className="text-gray-500">
+                Try adjusting your search criteria to find more results
+              </p>
+            </div>
           ) : (
-            <>
-              {listings.map((listing) => (
-                <ListingItem key={listing._id} listing={listing} />
-              ))}
+            <div className="space-y-8">
+              <div className="flex flex-row-1 md:flex-row-2 lg:flex-row-4 gap-6">
+                {listings.map((listing) => (
+                  <ListingItem key={listing._id} listing={listing} />
+                ))}
+              </div>
+
               {showMore && (
-                <button
-                  onClick={handleShowMore}
-                  className="text-green-700 hover:underline p-7 text-center w-full"
-                  disabled={loading}
-                >
-                  {loading ? "Loading..." : "Show more"}
-                </button>
+                <div className="text-center pt-8">
+                  <button
+                    onClick={handleShowMore}
+                    className="bg-blue-600 text-white px-8 py-3 rounded-full font-semibold hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 transform hover:scale-105"
+                    disabled={loading}
+                  >
+                    {loading ? "Loading..." : "Load More Properties"}
+                  </button>
+                </div>
               )}
-            </>
+            </div>
           )}
         </div>
       </div>
