@@ -24,3 +24,8 @@ This is features of profile like show listings and signout and delete and create
 This is coantact for diff user->
 <img width="1366" height="768" alt="contact" src="https://github.com/user-attachments/assets/99ffd450-5a08-4727-a510-e5b75170f999" />
 <img width="1366" height="768" alt="contact form" src="https://github.com/user-attachments/assets/85fc925e-8ae6-4120-840b-fee8c442c2b2" />
+This is about us page looks like->
+<img width="1366" height="681" alt="about" src="https://github.com/user-attachments/assets/d2da69b9-f0ae-442d-a4d4-dd7816952312" />
+<img width="1366" height="682" alt="about_" src="https://github.com/user-attachments/assets/1d5c8ceb-dbb0-4046-82b2-cfd685647a2b" />
+
+
