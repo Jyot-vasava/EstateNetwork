@@ -9,6 +9,7 @@ import Header from "./components/Header";
 import UpdateListing from "./pages/UpdateListing";
 import Listing from "./pages/Listing";
 import Search from "./pages/search";
+import ProtectedRoute from "./pages/protected";
 
 
 function App() {
@@ -22,9 +23,21 @@ function App() {
         <Route path="/signin" element={<SignIn />} />
         <Route path="/listings/:listingId" element={<Listing />} />
         <Route path="/search" element={<Search />} />
-        <Route path="/profile" element={<Profile />} />
-        <Route path="/create-listing" element={<CreateListing />} />
-        <Route path="/update-listing/:id" element={<UpdateListing />} />
+
+        <Route
+          path="/profile"
+          element={<ProtectedRoute Component={Profile} />}
+        />
+
+        <Route
+          path="/create-listing"
+          element={<ProtectedRoute Component={CreateListing} />}
+        />
+        
+        <Route
+          path="/update-listing/:id"
+          element={<ProtectedRoute Component={UpdateListing} />}
+        />
         <Route path="*" element={<div>404 Not Found</div>} />
       </Routes>
     </BrowserRouter>

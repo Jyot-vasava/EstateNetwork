@@ -138,18 +138,17 @@ const Listing = () => {
                           🏷️ SPECIAL OFFER
                         </span>
                         <span className="bg-green-100 text-green-800 px-4 py-2 rounded-full text-sm font-medium shadow-lg">
-                          Save $
-                          {(
+                          Save INR  {(
                             listing.regularprice - listing.discountedprice
                           ).toLocaleString()}
                         </span>
                       </div>
                       <div className="flex items-center gap-4 flex-wrap">
                         <span className="text-4xl lg:text-5xl font-bold text-green-400">
-                          ${listing.discountedprice.toLocaleString()}
+                         INR {listing.discountedprice.toLocaleString()}
                         </span>
                         <span className="text-2xl text-gray-400 line-through">
-                          ${listing.regularprice.toLocaleString()}
+                         INR {listing.regularprice.toLocaleString()}
                         </span>
                         {listing.type === "rent" && (
                           <span className="text-lg font-normal text-gray-300">
@@ -161,7 +160,7 @@ const Listing = () => {
                   ) : (
                     <div className="flex items-center gap-4 flex-wrap">
                       <span className="text-4xl lg:text-5xl font-bold text-green-400">
-                        ${listing.regularprice.toLocaleString()}
+                        INR {listing.regularprice.toLocaleString()}
                       </span>
                       {listing.type === "rent" && (
                         <span className="text-lg font-normal text-gray-300">

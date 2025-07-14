@@ -36,8 +36,7 @@ const ListingItem = ({ listing }) => {
         </p>
 
         <p className="text-slate-500 mt-2 font-semibold text-lg">
-          $
-          {listing.offer
+          INR {listing.offer
             ? listing.discountedprice?.toLocaleString("en-US")
             : listing.regularprice?.toLocaleString("en-US")}
           {listing.type === "rent" && " / month"}
@@ -49,8 +48,7 @@ const ListingItem = ({ listing }) => {
               ${listing.regularprice?.toLocaleString("en-US")}
             </span>
             <span className="text-green-600 text-xs font-medium">
-              Save $
-              {(listing.regularprice - listing.discountedprice)?.toLocaleString(
+              Save INR {(listing.regularprice - listing.discountedprice)?.toLocaleString(
                 "en-US"
               )}
             </span>
