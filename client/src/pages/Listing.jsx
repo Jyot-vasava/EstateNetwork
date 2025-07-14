@@ -24,7 +24,7 @@ const Listing = () => {
       try {
         setLoading(true);
         const res = await fetch(
-          `https://estate-network-backend-api.onrender.com/api/listings/get/${params.listingId}`
+          `${config.BACKEND_API}/api/listings/get/${params.listingId}`
         );
         const data = await res.json();
 

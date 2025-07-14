@@ -32,9 +32,7 @@ const UpdateListing = () => {
       try {
         setLoading(true);
         // Fixed: Use the correct API endpoint
-        const res = await fetch(
-          `https://estate-network-backend-api.onrender.com/api/listing/get/${id}`
-        );
+        const res = await fetch(`${config.BACKEND_API}/api/listing/get/${id}`);
         const data = await res.json();
 
         if (!res.ok) {
@@ -105,7 +103,7 @@ const UpdateListing = () => {
       }
 
       const res = await fetch(
-        "https://estate-network-backend-api.onrender.com/api/listing/upload-images",
+        "${config.BACKEND_API}/api/listing/upload-images",
         {
           method: "POST",
           body: formDataToSend,
@@ -157,7 +155,7 @@ const UpdateListing = () => {
     try {
       setLoading(true);
       const res = await fetch(
-        `https://estate-network-backend-api.onrender.com/api/listing/update/${id}`,
+        `${config.BACKEND_API}/api/listing/update/${id}`,
         {
           method: "PUT",
           headers: {

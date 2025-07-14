@@ -123,13 +123,10 @@ const CreateListing = () => {
       const formData = new FormData();
       formData.append("images", file);
 
-      fetch(
-        `https://estate-network-backend-api.onrender.com/api/listing/upload-images`,
-        {
-          method: "POST",
-          body: formData,
-        }
-      )
+      fetch(`${config.BACKEND_API}/api/listing/upload-images`, {
+        method: "POST",
+        body: formData,
+      })
         .then((res) => res.json())
         .then((data) => {
           if (data.urls && data.urls.length > 0) {
@@ -165,20 +162,17 @@ const CreateListing = () => {
       setLoading(true);
       setError(false);
 
-      const res = await fetch(
-        `https://estate-network-backend-api.onrender.com/api/listing/create`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            ...formData,
-            imageurl: formData.imageUrls,
-            userRef: user._id,
-          }),
-        }
-      );
+      const res = await fetch(`${config.BACKEND_API}/api/listing/create`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          ...formData,
+          imageurl: formData.imageUrls,
+          userRef: user._id,
+        }),
+      });
       const data = await res.json();
 
       setLoading(false);
