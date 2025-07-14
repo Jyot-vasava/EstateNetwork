@@ -25,6 +25,9 @@ const Home = () => {
         setLoading(true);
 
         // Fetch offer listings
+        console.log(
+          `${process.env.REACT_APP_BACKEND_URL}/api/listing/get?offer=true&limit=4`
+        );
         const offerRes = await fetch(
           `${process.env.REACT_APP_BACKEND_URL}/api/listing/get?offer=true&limit=4`
         );
