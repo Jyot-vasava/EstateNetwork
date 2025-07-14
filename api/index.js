@@ -14,7 +14,14 @@ const __dirname = path.resolve();
 const app = express();
 
 // Middleware
-app.use(cors());
+
+app.use(
+  cors({
+    origin: "https://estate-networks.vercel.app",
+    credentials: true, // if using cookies/auth
+  })
+);
+
 app.use(express.json({ limit: "10mb" }));
 app.use(express.urlencoded({ extended: true, limit: "10mb" }));
 app.use(cookieParser());
@@ -24,7 +31,7 @@ app.use("/api/listings", listingRoutes);
 app.use((req, res, next) => {
   res.header(
     "Access-Control-Allow-Origin",
-    "http://localhost:5173",
+    // "http://localhost:5173",
     "https://estate-networks.vercel.app/"
   );
   res.header("Access-Control-Allow-Credentials", "true");

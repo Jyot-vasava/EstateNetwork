@@ -26,7 +26,7 @@ const Home = () => {
 
         // Fetch offer listings
         const offerRes = await fetch(
-          "https://estate-network-backend-api.onrender.com/api/listing/get?offer=true&limit=4"
+          `${process.env.REACT_APP_BACKEND_URL}/api/listing/get?offer=true&limit=4`
         );
         const offerData = await offerRes.json();
         setOfferListings(offerData);
