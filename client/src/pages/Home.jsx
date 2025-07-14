@@ -13,6 +13,8 @@ import {
   FaPlay,
 } from "react-icons/fa";
 
+import config from "../../config";
+
 const Home = () => {
   const [offerListings, setOfferListings] = useState([]);
   const [saleListings, setSaleListings] = useState([]);
@@ -25,11 +27,8 @@ const Home = () => {
         setLoading(true);
 
         // Fetch offer listings
-        console.log(
-          `${process.env.REACT_APP_BACKEND_URL}/api/listing/get?offer=true&limit=4`
-        );
         const offerRes = await fetch(
-          `${process.env.REACT_APP_BACKEND_URL}/api/listing/get?offer=true&limit=4`
+          `${config.BACKEND_API}/api/listing/get?offer=true&limit=4`
         );
         const offerData = await offerRes.json();
         setOfferListings(offerData);
