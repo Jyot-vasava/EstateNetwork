@@ -8,7 +8,7 @@ export default defineConfig({
   server: {
     proxy: {
       "/api": {
-        target: "https://estate-network-backend-api.onrender.com/",
+        target: "https://estate-network-backend-api.onrender.com",
         // target: "http://localhost:3000",
         changeOrigin: true, // proxy to localhost:3000
         secure: false, // if the target is using https, set this to true
