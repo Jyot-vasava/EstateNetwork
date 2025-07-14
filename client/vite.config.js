@@ -5,18 +5,16 @@ import tailwindcss from '@tailwindcss/vite'
 
 // https://vite.dev/config/
 export default defineConfig({
-
-
- server: {
-  proxy: {
-    '/api': {
-      // target: "https://estate-network-api.onrender.com",
-      target: "http://localhost:3000", 
-      changeOrigin: true, // proxy to localhost:3000
-      secure: false, // if the target is using https, set this to true
+  server: {
+    proxy: {
+      "/api": {
+        target: "https://estate-network-backend-api.onrender.com/",
+        // target: "http://localhost:3000",
+        changeOrigin: true, // proxy to localhost:3000
+        secure: false, // if the target is using https, set this to true
+      },
     },
   },
-  },
-  
-  plugins: [react(), tailwindcss(),],
+
+  plugins: [react(), tailwindcss()],
 });
