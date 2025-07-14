@@ -11,6 +11,7 @@ import {
 } from "../redux/user/userSlice";
 import { Link } from "react-router-dom";
 import { Toaster } from "react-hot-toast";
+import config from "../../config";
 
 const Profile = () => {
   const { user, loading, error } = useSelector((state) => state.user);
@@ -119,12 +120,15 @@ const Profile = () => {
 
       if (!updatedFormData.password) delete updatedFormData.password;
 
-      const response = await fetch(`/api/user/update/${user._id}`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-        body: JSON.stringify(updatedFormData),
-      });
+      const response = await fetch(
+        `${config.BACKEND_API}/api/user/update/${user._id}`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          credentials: "include",
+          body: JSON.stringify(updatedFormData),
+        }
+      );
 
       const data = await response.json();
       if (!response.ok || data.success === false) {
@@ -159,10 +163,13 @@ const Profile = () => {
 
     try {
       dispatch(deleteUserStart());
-      const response = await fetch(`/api/user/delete/${user._id}`, {
-        method: "DELETE",
-        credentials: "include",
-      });
+      const response = await fetch(
+        `${config.BACKEND_API}/api/user/delete/${user._id}`,
+        {
+          method: "DELETE",
+          credentials: "include",
+        }
+      );
       const data = await response.json();
 
       if (data.success) {
@@ -181,7 +188,7 @@ const Profile = () => {
 
   const handleSignOut = async () => {
     try {
-      await fetch("/api/auth/signout", {
+      await fetch(`${config.BACKEND_API}/api/auth/signout`, {
         method: "POST",
         credentials: "include",
       });
@@ -199,13 +206,16 @@ const Profile = () => {
       setShowListingserror(false);
 
       // Fetch user's listings from API endpoint
-      const response = await fetch(`/api/listing/user/${user._id}`, {
-        method: "GET",
-        credentials: "include",
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
+      const response = await fetch(
+        `${config.BACKEND_API}/api/listing/user/${user._id}`,
+        {
+          method: "GET",
+          credentials: "include",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
 
       if (!response.ok) {
         const errorData = await response.json();
@@ -250,10 +260,13 @@ const Profile = () => {
     }
 
     try {
-      const response = await fetch(`/api/listing/delete/${listingId}`, {
-        method: "DELETE",
-        credentials: "include",
-      });
+      const response = await fetch(
+        `${config.BACKEND_API}/api/listing/delete/${listingId}`,
+        {
+          method: "DELETE",
+          credentials: "include",
+        }
+      );
       const data = await response.json();
 
       if (data.success) {

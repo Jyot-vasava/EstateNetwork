@@ -6,6 +6,7 @@ import "swiper/css";
 import "swiper/css/navigation";
 import { useSelector } from "react-redux";
 import Contact from "../components/contact";
+import config from "../../config";
 
 const Listing = () => {
   const [loading, setLoading] = useState(true);
@@ -22,7 +23,9 @@ const Listing = () => {
     const fetchListing = async () => {
       try {
         setLoading(true);
-        const res = await fetch(`/api/listings/get/${params.listingId}`);
+        const res = await fetch(
+          `${config.BACKEND_API}/api/listings/get/${params.listingId}`
+        );
         const data = await res.json();
 
         if (data.success === false) {

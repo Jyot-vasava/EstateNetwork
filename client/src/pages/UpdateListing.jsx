@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { toast } from "react-hot-toast";
+import config from "../../config";
 
 const UpdateListing = () => {
   const { id } = useParams();
@@ -31,7 +32,7 @@ const UpdateListing = () => {
       try {
         setLoading(true);
         // Fixed: Use the correct API endpoint
-        const res = await fetch(`/api/listing/get/${id}`);
+        const res = await fetch(`${config.BACKEND_API}/api/listing/get/${id}`);
         const data = await res.json();
 
         if (!res.ok) {
@@ -101,10 +102,13 @@ const UpdateListing = () => {
         formDataToSend.append("images", images[i]);
       }
 
-      const res = await fetch("/api/listing/upload-images", {
-        method: "POST",
-        body: formDataToSend,
-      });
+      const res = await fetch(
+        "${config.BACKEND_API}/api/listing/upload-images",
+        {
+          method: "POST",
+          body: formDataToSend,
+        }
+      );
 
       const data = await res.json();
 
@@ -150,13 +154,16 @@ const UpdateListing = () => {
 
     try {
       setLoading(true);
-      const res = await fetch(`/api/listing/update/${id}`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(formData),
-      });
+      const res = await fetch(
+        `${config.BACKEND_API}/api/listing/update/${id}`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(formData),
+        }
+      );
 
       const data = await res.json();
 

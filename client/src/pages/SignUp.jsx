@@ -1,6 +1,7 @@
 import React from "react";
 import { useNavigate, Link } from "react-router-dom";
 import RAuth from "../components/RAuth";
+import config from "../../config";
 
 const SignUp = () => {
   const [error, setError] = React.useState(null);
@@ -24,7 +25,7 @@ const SignUp = () => {
 
     try {
       setLoading(true);
-      const res = await fetch("/api/auth/signup", {
+      const res = await fetch(`${config.BACKEND_API}/api/auth/signup`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

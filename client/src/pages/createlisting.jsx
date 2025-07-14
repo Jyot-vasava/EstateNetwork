@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
+import config from "../../config";
 
 const CreateListing = () => {
   const navigate = useNavigate();
@@ -122,7 +123,7 @@ const CreateListing = () => {
       const formData = new FormData();
       formData.append("images", file);
 
-      fetch("/api/listing/upload-images", {
+      fetch(`${config.BACKEND_API}/api/listing/upload-images`, {
         method: "POST",
         body: formData,
       })
@@ -161,7 +162,7 @@ const CreateListing = () => {
       setLoading(true);
       setError(false);
 
-      const res = await fetch("/api/listing/create", {
+      const res = await fetch(`${config.BACKEND_API}/api/listing/create`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
