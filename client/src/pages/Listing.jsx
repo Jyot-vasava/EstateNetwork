@@ -24,7 +24,7 @@ const Listing = () => {
       try {
         setLoading(true);
         const res = await fetch(
-          `${config.BACKEND_API}/api/listings/get/${params.listingId}`
+          `https://estate-network-backend-api.onrender.com/api/listings/get/${params.listingId}`
         );
         const data = await res.json();
 
@@ -141,17 +141,18 @@ const Listing = () => {
                           🏷️ SPECIAL OFFER
                         </span>
                         <span className="bg-green-100 text-green-800 px-4 py-2 rounded-full text-sm font-medium shadow-lg">
-                          Save INR  {(
+                          Save INR{" "}
+                          {(
                             listing.regularprice - listing.discountedprice
                           ).toLocaleString()}
                         </span>
                       </div>
                       <div className="flex items-center gap-4 flex-wrap">
                         <span className="text-4xl lg:text-5xl font-bold text-green-400">
-                         INR {listing.discountedprice.toLocaleString()}
+                          INR {listing.discountedprice.toLocaleString()}
                         </span>
                         <span className="text-2xl text-gray-400 line-through">
-                         INR {listing.regularprice.toLocaleString()}
+                          INR {listing.regularprice.toLocaleString()}
                         </span>
                         {listing.type === "rent" && (
                           <span className="text-lg font-normal text-gray-300">

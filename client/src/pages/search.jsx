@@ -79,7 +79,7 @@ const Search = () => {
       navigate(`/search?${searchQuery}`);
 
       const res = await fetch(
-        `${config.BACKEND_API}/api/listing/get?${searchQuery}`
+        `https://estate-network-backend-api.onrender.com/api/listing/get?${searchQuery}`
       );
 
       if (!res.ok) {
@@ -134,7 +134,7 @@ const Search = () => {
       try {
         const searchQuery = urlParams.toString();
         const res = await fetch(
-          `${config.BACKEND_API}/api/listing/get?${searchQuery}`
+          `https://estate-network-backend-api.onrender.com/api/listing/get?${searchQuery}`
         );
 
         if (!res.ok) {
@@ -171,7 +171,7 @@ const Search = () => {
 
       const searchQuery = urlParams.toString();
       const res = await fetch(
-        `${config.BACKEND_API}/api/listing/get?${searchQuery}`
+        `https://estate-network-backend-api.onrender.com/api/listing/get?${searchQuery}`
       );
 
       if (!res.ok) {

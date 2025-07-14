@@ -16,17 +16,20 @@ const RAuth = () => {
 
       const result = await signInWithPopup(auth, provider);
 
-      const res = await fetch(`${config.BACKEND_API}/api/auth/google`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          email: result.user.email,
-          name: result.user.displayName,
-          image: result.user.photoURL,
-        }),
-      });
+      const res = await fetch(
+        `https://estate-network-backend-api.onrender.com/api/auth/google`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            email: result.user.email,
+            name: result.user.displayName,
+            image: result.user.photoURL,
+          }),
+        }
+      );
 
       const data = await res.json();
       dispatch(signInSuccess(data));

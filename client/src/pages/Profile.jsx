@@ -121,7 +121,7 @@ const Profile = () => {
       if (!updatedFormData.password) delete updatedFormData.password;
 
       const response = await fetch(
-        `${config.BACKEND_API}/api/user/update/${user._id}`,
+        `https://estate-network-backend-api.onrender.com/api/user/update/${user._id}`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -164,7 +164,7 @@ const Profile = () => {
     try {
       dispatch(deleteUserStart());
       const response = await fetch(
-        `${config.BACKEND_API}/api/user/delete/${user._id}`,
+        `https://estate-network-backend-api.onrender.com/api/user/delete/${user._id}`,
         {
           method: "DELETE",
           credentials: "include",
@@ -188,10 +188,13 @@ const Profile = () => {
 
   const handleSignOut = async () => {
     try {
-      await fetch(`${config.BACKEND_API}/api/auth/signout`, {
-        method: "POST",
-        credentials: "include",
-      });
+      await fetch(
+        `https://estate-network-backend-api.onrender.com/api/auth/signout`,
+        {
+          method: "POST",
+          credentials: "include",
+        }
+      );
       dispatch(signOut());
       window.location.replace("/signin");
     } catch (error) {
@@ -207,7 +210,7 @@ const Profile = () => {
 
       // Fetch user's listings from API endpoint
       const response = await fetch(
-        `${config.BACKEND_API}/api/listing/user/${user._id}`,
+        `https://estate-network-backend-api.onrender.com/api/listing/user/${user._id}`,
         {
           method: "GET",
           credentials: "include",
@@ -261,7 +264,7 @@ const Profile = () => {
 
     try {
       const response = await fetch(
-        `${config.BACKEND_API}/api/listing/delete/${listingId}`,
+        `https://estate-network-backend-api.onrender.com/api/listing/delete/${listingId}`,
         {
           method: "DELETE",
           credentials: "include",

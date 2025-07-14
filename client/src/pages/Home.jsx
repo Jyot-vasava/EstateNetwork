@@ -28,21 +28,21 @@ const Home = () => {
 
         // Fetch offer listings
         const offerRes = await fetch(
-          `${config.BACKEND_API}/api/listing/get?offer=true&limit=4`
+          `https://estate-network-backend-api.onrender.com/api/listing/get?offer=true&limit=4`
         );
         const offerData = await offerRes.json();
         setOfferListings(offerData);
 
         // Fetch rent listings
         const rentRes = await fetch(
-           `${config.BACKEND_API}/api/listing/get?rent=true&limit=4`
+          `https://estate-network-backend-api.onrender.com/api/listing/get?rent=true&limit=4`
         );
         const rentData = await rentRes.json();
         setRentListings(rentData);
 
         // Fetch sale listings
         const saleRes = await fetch(
-           `${config.BACKEND_API}/api/listing/get?sell=true&limit=4`
+          `https://estate-network-backend-api.onrender.com/api/listing/get?sell=true&limit=4`
         );
         const saleData = await saleRes.json();
         setSaleListings(saleData);
